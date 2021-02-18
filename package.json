@@ -1,0 +1,19 @@
+{
+  "name": "Collectr",
+  "version": "0.0.1",
+  "scripts": {
+    "server": "node server/server.js",
+    "eslint": "eslint ./",
+    "eslint-fix": "eslint ./ --fix"
+  },
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "mongoose": "^5.11.15"
+  },
+  "devDependencies": {
+    "eslint": "^7.19.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-plugin-import": "^2.22.1"
+  }
+}
