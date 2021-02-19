@@ -4,7 +4,8 @@
   "scripts": {
     "server": "node server/server.js",
     "eslint": "eslint ./",
-    "eslint-fix": "eslint ./ --fix"
+    "eslint-fix": "eslint ./ --fix",
+    "test": "mocha \"./test/*.test.js\""
   },
   "dependencies": {
     "dotenv": "^8.2.0",
@@ -12,8 +13,11 @@
     "mongoose": "^5.11.15"
   },
   "devDependencies": {
+    "chai": "^4.3.0",
+    "chai-http": "^4.3.0",
     "eslint": "^7.19.0",
     "eslint-config-airbnb-base": "^14.2.1",
-    "eslint-plugin-import": "^2.22.1"
+    "eslint-plugin-import": "^2.22.1",
+    "mocha": "^8.3.0"
   }
 }
