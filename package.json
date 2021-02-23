@@ -5,7 +5,7 @@
     "server": "node server/server.js",
     "eslint": "eslint ./",
     "eslint-fix": "eslint ./ --fix",
-    "test": "mocha \"./test/*.test.js\" -exit"
+    "test": "mocha --timeout 10000 \"./test/*.test.js\" -exit"
   },
   "dependencies": {
     "dotenv": "^8.2.0",

@@ -7,7 +7,7 @@ class Mongoose {
   }
 
   _connect() {
-    mongoose.connect(config.DB, { useNewUrlParser: true, useUnifiedTopology: true })
+    mongoose.connect(config.DB, { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false })
       .then(() => {
         console.log('Successfully connected to Mongoose');
       })
