@@ -34,7 +34,6 @@ describe('Collection Test', () => {
       response.body.should.be.a('object');
       response.body.should.have.property('name');
       response.body.should.have.property('description');
-      response.body.should.have.property('items');
     });
   });
 
@@ -66,7 +65,6 @@ describe('Collection Test', () => {
       response.body.should.be.a('object');
       response.body.should.have.property('name');
       response.body.should.have.property('description');
-      response.body.should.have.property('items');
       response.body.should.have.property('_id').eql(collection.id);
     });
   });
