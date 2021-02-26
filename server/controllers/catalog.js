@@ -8,14 +8,12 @@ const StatusCode = require('../helpers/constants');
  * @returns {Promise<void>} the promise indicating success
  */
 const getCatalogs = async (req, res) => {
-
-    try {
-        const catalogs = await Catalog.find(); // Find all Catalog objects
-        res.status(StatusCode.OK).json( catalogs );
-    } catch (err) {
-        res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
-    }
-
+  try {
+    const catalogs = await Catalog.find(); // Find all Catalog objects
+    res.status(StatusCode.OK).json(catalogs);
+  } catch (err) {
+    res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
+  }
 };
 
 /**
@@ -25,18 +23,16 @@ const getCatalogs = async (req, res) => {
  * @returns {Promise<void>} the promise indicating success
  */
 const addCatalog = async (req, res) => {
+  const { name, description } = req.body;
 
-    const { name, description } = req.body;
+  const catalog = new Catalog({ name, description });
 
-    let catalog = new Catalog({ name, description });
-
-    try {
-        const newCatalog = await catalog.save();
-        res.status(StatusCode.CREATED).json( newCatalog );
-    } catch (err) {
-        res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
-    }
-
+  try {
+    const newCatalog = await catalog.save();
+    res.status(StatusCode.CREATED).json(newCatalog);
+  } catch (err) {
+    res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
+  }
 };
 
 /**
@@ -46,17 +42,15 @@ const addCatalog = async (req, res) => {
  * @returns {Promise<void>} the promise indicating success
  */
 const getCatalog = async (req, res) => {
+  const { id } = req.params;
 
-    const { id } = req.params;
-
-    try {
-        const catalog = await Catalog.findById(id);
-        res.status(StatusCode.OK).json( catalog );
-    } catch (err) {
-        res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
-    }
-
-}
+  try {
+    const catalog = await Catalog.findById(id);
+    res.status(StatusCode.OK).json(catalog);
+  } catch (err) {
+    res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
+  }
+};
 
 /**
  * Updates a pre-existing Catalog object
@@ -65,20 +59,18 @@ const getCatalog = async (req, res) => {
  * @returns {Promise<void>} the promise indicating success
  */
 const updateCatalog = async (req, res) => {
+  const { id } = req.params;
+  const { name, description } = req.body;
 
-    const { id } = req.params;
-    const { name, description } = req.body;
+  const catalog = new Catalog({ _id: id, name, description });
 
-    let catalog = new Catalog({ _id: id, name: name, description: description });
-
-    try {
-        const updatedCatalog = await Catalog.findByIdAndUpdate(id, catalog, { new: true });
-        res.status(StatusCode.OK).json( updatedCatalog );
-    } catch (err) {
-        res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
-    }
-
-}
+  try {
+    const updatedCatalog = await Catalog.findByIdAndUpdate(id, catalog, { new: true });
+    res.status(StatusCode.OK).json(updatedCatalog);
+  } catch (err) {
+    res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
+  }
+};
 
 /**
  * Delete a specific Catalog object
@@ -87,22 +79,20 @@ const updateCatalog = async (req, res) => {
  * @returns {Promise<void>} the promise indicating success
  */
 const deleteCatalog = async (req, res) => {
+  const { id } = req.params;
 
-    const { id } = req.params;
-
-    try {
-        const deletedCatalog = await Catalog.findByIdAndRemove(id);
-        res.status(StatusCode.OK).json( deletedCatalog );
-    } catch (err) {
-        res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
-    }
-
-}
+  try {
+    const deletedCatalog = await Catalog.findByIdAndRemove(id);
+    res.status(StatusCode.OK).json(deletedCatalog);
+  } catch (err) {
+    res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
+  }
+};
 
 module.exports = {
-    getCatalogs,
-    addCatalog,
-    getCatalog,
-    updateCatalog,
-    deleteCatalog
-}
+  getCatalogs,
+  addCatalog,
+  getCatalog,
+  updateCatalog,
+  deleteCatalog,
+};
