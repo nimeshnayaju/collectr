@@ -2,13 +2,14 @@ const chai = require('chai');
 const chaiHttp = require('chai-http');
 const app = require('../server/server');
 const Collection = require('../server/models/collection');
+
 const should = chai.should();
 
 chai.use(chaiHttp);
 
 let collection = {
-  name: "Vinyl Records",
-  description: "Collection of Vinyl records from the 1980s"
+  name: 'Vinyl Records',
+  description: 'Collection of Vinyl records from the 1980s'
 };
 
 describe('Collection Test', () => {
