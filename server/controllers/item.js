@@ -9,7 +9,7 @@ const StatusCode = require('../helpers/constants');
  */
 const getItems = async (req, res) => {
   try {
-    const records = await Item.find(); // Find all Collection objects
+    const records = await Item.find();
     res.status(StatusCode.OK).json(records);
   } catch (err) {
     res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
