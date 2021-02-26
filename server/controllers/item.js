@@ -52,9 +52,7 @@ const getCatalogItems = async (req, res) => {
   try {
     const catalog = await Catalog.findById(id); // get the specified catalog by id
     // eslint-disable-next-line no-underscore-dangle
-    const items = await Item.find({catalog: catalog._id }).populate('catalog');
-
-    // get the items by catalog
+    const items = await Item.find({ catalog: catalog._id }).populate('catalog'); // get the items by catalog
     res.status(StatusCode.OK).json(items);
   } catch (err) {
     res.status(StatusCode.BAD_REQUEST).json({ message: err.message });

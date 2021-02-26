@@ -1,6 +1,7 @@
 const chai = require('chai');
 const chaiHttp = require('chai-http');
 const app = require('../server/server');
+const statusCode = require('../server/helpers/constants');
 const Catalog = require('../server/models/catalog');
 
 const should = chai.should();
@@ -30,7 +31,7 @@ describe('Catalog Test', () => {
 
       catalog.id = response.body._id;
 
-      response.should.have.status(201);
+      response.should.have.status(statusCode.CREATED);
       response.body.should.be.a('object');
       response.body.should.have.property('name');
       response.body.should.have.property('description');
@@ -45,7 +46,7 @@ describe('Catalog Test', () => {
       const response = await chai.request(app)
         .get('/catalogs');
 
-      response.should.have.status(200);
+      response.should.have.status(statusCode.OK);
       response.body.should.be.a('array');
       response.body.length.should.be.eql(1);
     });
@@ -59,7 +60,7 @@ describe('Catalog Test', () => {
       const response = await chai.request(app)
         .get(`/catalogs/${catalog.id}`);
 
-      response.should.have.status(200);
+      response.should.have.status(statusCode.OK);
       response.body[0].should.be.a('object');
       response.body[0].should.have.property('name');
       response.body[0].should.have.property('description');
@@ -78,7 +79,7 @@ describe('Catalog Test', () => {
         .put(`/catalogs/${catalog.id}`)
         .send(newCollection);
 
-      response.should.have.status(200);
+      response.should.have.status(statusCode.OK);
       response.body.should.be.a('object');
       response.body.should.have.property('description').eql(newCollection.description);
     });
@@ -92,7 +93,7 @@ describe('Catalog Test', () => {
       const response = await chai.request(app)
         .delete(`/catalogs/${catalog.id}`);
 
-      response.should.have.status(200);
+      response.should.have.status(statusCode.OK);
       response.body.should.be.a('object');
     });
   });

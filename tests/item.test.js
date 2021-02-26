@@ -28,6 +28,7 @@ describe('Item Test', () => {
       .post('/catalogs')
       .send(catalog);
 
+    catalog.id = response.body.catalog._id;
     item.catalog = response.body._id;
   });
 
@@ -59,7 +60,7 @@ describe('Item Test', () => {
   describe('GET /items/', () => {
     it('should list all items in a catalog', async () => {
       const response = await chai.request(app)
-        .get('/items/' + catalog.id);
+          .get('/items/' + catalog.id);
       response.should.have.status(statusCode.OK);
       response.body.should.be.a('array');
       response.body.length.should.be.eql(1);
@@ -72,7 +73,7 @@ describe('Item Test', () => {
   describe('GET /items/catalog/:id', () => {
     it('should list all items in a catalog', async () => {
       const response = await chai.request(app)
-        .get('/items/catalog/' + catalog.id);
+          .get('/items/catalog/' + catalog.id);
       response.should.have.status(statusCode.OK);
       response.body.should.be.a('array');
       response.body.length.should.be.eql(1);
