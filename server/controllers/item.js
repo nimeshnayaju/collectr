@@ -47,7 +47,7 @@ const getItems = async (req, res) => {
  * @returns {Promise<void>} the promise indicating success
  */
 const getCatalogItems = async (req, res) => {
-  const { id } = req.body;
+  const { id } = req.params;
 
   try {
     const catalog = await Catalog.findById(id); // get the specified catalog by id

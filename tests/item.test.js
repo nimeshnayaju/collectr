@@ -58,7 +58,7 @@ describe('Item Test', () => {
    * Test GET /items/
    */
   describe('GET /items/', () => {
-    it('should list all items in a catalog', async () => {
+    it('should list all items', async () => {
       const response = await chai.request(app)
           .get('/items/' + catalog.id);
       response.should.have.status(statusCode.OK);
@@ -70,7 +70,7 @@ describe('Item Test', () => {
   /**
    * Test GET /items/catalog/:id
    */
-  describe('GET /items/catalog/:id', () => {
+  describe('GET /items/catalog/', () => {
     it('should list all items in a catalog', async () => {
       const response = await chai.request(app)
           .get('/items/catalog/' + catalog.id);
