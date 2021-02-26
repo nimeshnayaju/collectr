@@ -1,13 +1,17 @@
 const Collection = require('../models/collection');
 const StatusCode = require('../helpers/constants');
 
+
 /**
- * Returns all Collection objects
+ * Lists all Collection objects
+ * @param req request object containing information about HTTP request
+ * @param res the response object used for sending back the desired HTTP response
+ * @returns {Promise<void>} the promise indicating success
  */
 const getCollections = async (req, res) => {
 
     try {
-        const collections = await Collection.find().populate('item'); // Find all Collection objects
+        const collections = await Collection.find(); // Find all Collection objects
         res.status(StatusCode.OK).json( collections );
     } catch (err) {
         res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
@@ -15,6 +19,12 @@ const getCollections = async (req, res) => {
 
 };
 
+/**
+ * Gets information about the specific Collection object
+ * @param req request object containing information about HTTP request
+ * @param res the response object used for sending back the desired HTTP response
+ * @returns {Promise<void>} the promise indicating success
+ */
 const addCollection = async (req, res) => {
 
     const { name, description } = req.body;
@@ -30,12 +40,18 @@ const addCollection = async (req, res) => {
 
 };
 
+/**
+ * Gets a specific Collection object
+ * @param req request object containing information about HTTP request
+ * @param res the response object used for sending back the desired HTTP response
+ * @returns {Promise<void>} the promise indicating success
+ */
 const getCollection = async (req, res) => {
 
     const { id } = req.params;
 
     try {
-        const collection = await Collection.findById(id).populate('item');
+        const collection = await Collection.findById(id);
         res.status(StatusCode.OK).json( collection );
     } catch (err) {
         res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
@@ -43,6 +59,12 @@ const getCollection = async (req, res) => {
 
 }
 
+/**
+ * Updates a pre-existing Collection object
+ * @param req request object containing information about HTTP request
+ * @param res the response object used for sending back the desired HTTP response
+ * @returns {Promise<void>} the promise indicating success
+ */
 const updateCollection = async (req, res) => {
 
     const { id } = req.params;
@@ -59,6 +81,12 @@ const updateCollection = async (req, res) => {
 
 }
 
+/**
+ * Delete a specific Collection object
+ * @param req request object containing information about HTTP request
+ * @param res the response object used for sending back the desired HTTP response
+ * @returns {Promise<void>} the promise indicating success
+ */
 const deleteCollection = async (req, res) => {
 
     const { id } = req.params;
