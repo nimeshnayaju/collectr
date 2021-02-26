@@ -1,6 +1,7 @@
 const chai = require('chai');
 const chaiHttp = require('chai-http');
 const app = require('../server/server');
+const statusCode = require('../server/helpers/constants');
 const Item = require('../server/models/item');
 
 const should = chai.should();
@@ -43,12 +44,38 @@ describe('Item Test', () => {
 
       item.id = response.body._id;
 
-      response.should.have.status(201);
+      response.should.have.status(statusCode.CREATED);
       response.body.should.be.a('object');
       response.body.should.have.property('name');
       response.body.should.have.property('manufacturer');
       response.body.should.have.property('date');
       response.body.should.have.property('catalog');
+    });
+  });
+
+  /**
+   * Test GET /items/
+   */
+  describe('GET /items/', () => {
+    it('should list all items in a catalog', async () => {
+      const response = await chai.request(app)
+        .get('/items/' + catalog.id);
+      response.should.have.status(statusCode.OK);
+      response.body.should.be.a('array');
+      response.body.length.should.be.eql(1);
+    });
+  });
+
+  /**
+   * Test GET /items/catalog/:id
+   */
+  describe('GET /items/catalog/:id', () => {
+    it('should list all items in a catalog', async () => {
+      const response = await chai.request(app)
+        .get('/items/catalog/' + catalog.id);
+      response.should.have.status(statusCode.OK);
+      response.body.should.be.a('array');
+      response.body.length.should.be.eql(1);
     });
   });
 });

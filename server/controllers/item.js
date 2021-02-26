@@ -26,15 +26,15 @@ const addItem = async (req, res) => {
 };
 
 /**
- * Lists all Item objects in a specific collection
+ * Lists all Item objects
  * @param req request object containing information about HTTP request
  * @param res the response object used for sending back the desired HTTP response
  * @returns {Promise<void>} the promise indicating success
  */
 const getItems = async (req, res) => {
   try {
-    const records = await Item.find();
-    res.status(StatusCode.OK).json(records);
+    const items = await Item.find();
+    res.status(StatusCode.OK).json(items);
   } catch (err) {
     res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
   }
@@ -47,11 +47,14 @@ const getItems = async (req, res) => {
  * @returns {Promise<void>} the promise indicating success
  */
 const getCatalogItems = async (req, res) => {
-  const { id } = req.params;
+  const { id } = req.body;
 
   try {
     const catalog = await Catalog.findById(id); // get the specified catalog by id
-    const items = await Item.findById(catalog); // get the items by catalog
+    // eslint-disable-next-line no-underscore-dangle
+    const items = await Item.find({catalog: catalog._id }).populate('catalog');
+
+    // get the items by catalog
     res.status(StatusCode.OK).json(items);
   } catch (err) {
     res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
