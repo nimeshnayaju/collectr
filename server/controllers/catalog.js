@@ -1,18 +1,17 @@
-const Collection = require('../models/collection');
+const Catalog = require('../models/catalog');
 const StatusCode = require('../helpers/constants');
 
-
 /**
- * Lists all Collection objects
+ * Lists all Catalog objects
  * @param req request object containing information about HTTP request
  * @param res the response object used for sending back the desired HTTP response
  * @returns {Promise<void>} the promise indicating success
  */
-const getCollections = async (req, res) => {
+const getCatalogs = async (req, res) => {
 
     try {
-        const collections = await Collection.find(); // Find all Collection objects
-        res.status(StatusCode.OK).json( collections );
+        const catalogs = await Catalog.find(); // Find all Catalog objects
+        res.status(StatusCode.OK).json( catalogs );
     } catch (err) {
         res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
     }
@@ -20,20 +19,20 @@ const getCollections = async (req, res) => {
 };
 
 /**
- * Gets information about the specific Collection object
+ * Adds a new Catalog object
  * @param req request object containing information about HTTP request
  * @param res the response object used for sending back the desired HTTP response
  * @returns {Promise<void>} the promise indicating success
  */
-const addCollection = async (req, res) => {
+const addCatalog = async (req, res) => {
 
     const { name, description } = req.body;
 
-    let collection = new Collection({ name, description });
+    let catalog = new Catalog({ name, description });
 
     try {
-        const newCollection = await collection.save();
-        res.status(StatusCode.CREATED).json( newCollection );
+        const newCatalog = await catalog.save();
+        res.status(StatusCode.CREATED).json( newCatalog );
     } catch (err) {
         res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
     }
@@ -41,18 +40,18 @@ const addCollection = async (req, res) => {
 };
 
 /**
- * Gets a specific Collection object
+ * Gets a specific Catalog object
  * @param req request object containing information about HTTP request
  * @param res the response object used for sending back the desired HTTP response
  * @returns {Promise<void>} the promise indicating success
  */
-const getCollection = async (req, res) => {
+const getCatalog = async (req, res) => {
 
     const { id } = req.params;
 
     try {
-        const collection = await Collection.findById(id);
-        res.status(StatusCode.OK).json( collection );
+        const catalog = await Catalog.findById(id);
+        res.status(StatusCode.OK).json( catalog );
     } catch (err) {
         res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
     }
@@ -60,21 +59,21 @@ const getCollection = async (req, res) => {
 }
 
 /**
- * Updates a pre-existing Collection object
+ * Updates a pre-existing Catalog object
  * @param req request object containing information about HTTP request
  * @param res the response object used for sending back the desired HTTP response
  * @returns {Promise<void>} the promise indicating success
  */
-const updateCollection = async (req, res) => {
+const updateCatalog = async (req, res) => {
 
     const { id } = req.params;
     const { name, description } = req.body;
 
-    let collection = new Collection({ _id: id, name: name, description: description });
+    let catalog = new Catalog({ _id: id, name: name, description: description });
 
     try {
-        const updatedCollection = await Collection.findByIdAndUpdate(id, collection, { new: true });
-        res.status(StatusCode.OK).json( updatedCollection );
+        const updatedCatalog = await Catalog.findByIdAndUpdate(id, catalog, { new: true });
+        res.status(StatusCode.OK).json( updatedCatalog );
     } catch (err) {
         res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
     }
@@ -82,18 +81,18 @@ const updateCollection = async (req, res) => {
 }
 
 /**
- * Delete a specific Collection object
+ * Delete a specific Catalog object
  * @param req request object containing information about HTTP request
  * @param res the response object used for sending back the desired HTTP response
  * @returns {Promise<void>} the promise indicating success
  */
-const deleteCollection = async (req, res) => {
+const deleteCatalog = async (req, res) => {
 
     const { id } = req.params;
 
     try {
-        const deletedCollection = await Collection.findByIdAndRemove(id);
-        res.status(StatusCode.OK).json( deletedCollection );
+        const deletedCatalog = await Catalog.findByIdAndRemove(id);
+        res.status(StatusCode.OK).json( deletedCatalog );
     } catch (err) {
         res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
     }
@@ -101,9 +100,9 @@ const deleteCollection = async (req, res) => {
 }
 
 module.exports = {
-    getCollections,
-    addCollection,
-    getCollection,
-    updateCollection,
-    deleteCollection
+    getCatalogs,
+    addCatalog,
+    getCatalog,
+    updateCatalog,
+    deleteCatalog
 }

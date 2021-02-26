@@ -1,34 +1,34 @@
 const chai = require('chai');
 const chaiHttp = require('chai-http');
 const app = require('../server/server');
-const Collection = require('../server/models/collection');
+const Catalog = require('../server/models/catalog');
 const should = chai.should();
 
 chai.use(chaiHttp);
 
-let collection = {
+let catalog = {
   name: "Vinyl Records",
   description: "Collection of Vinyl records from the 1980s"
 };
 
-describe('Collection Test', () => {
+describe('Catalog Test', () => {
   before(async () => {
     // Clear the collection before the test
-    await Collection.deleteMany({});
+    await Catalog.deleteMany({});
   })
 
   /**
-   * Test POST /collections
+   * Test POST /catalogs
    */
-  describe('POST /collections', () => {
-    it('should create a new collection', async () => {
+  describe('POST /catalogs', () => {
+    it('should create a new catalog', async () => {
 
       const response = await chai
           .request(app)
-          .post('/collections')
-          .send(collection);
+          .post('/catalogs')
+          .send(catalog);
 
-      collection.id = response.body._id;
+      catalog.id = response.body._id;
 
       response.should.have.status(201);
       response.body.should.be.a('object');
@@ -38,13 +38,13 @@ describe('Collection Test', () => {
   });
 
   /**
-   * Test GET /collections
+   * Test GET /catalogs
    */
-  describe('GET /collections', () => {
-    it('should list all collections', async () => {
+  describe('GET /catalogs', () => {
+    it('should list all catalogs', async () => {
 
       const response = await chai.request(app)
-          .get('/collections');
+          .get('/catalogs');
 
       response.should.have.status(200);
       response.body.should.be.a('array');
@@ -53,32 +53,32 @@ describe('Collection Test', () => {
   });
 
   /**
-   * Test GET /collections/:id
+   * Test GET /catalogs/:id
    */
-  describe('GET collections/:id', () => {
-    it('should return the collection with the specified id', async () => {
+  describe('GET catalogs/:id', () => {
+    it('should return the catalog with the specified id', async () => {
 
       const response = await chai.request(app)
-          .get('/collections/' + collection.id);
+          .get('/catalogs/' + catalog.id);
 
       response.should.have.status(200);
-      response.body.should.be.a('object');
-      response.body.should.have.property('name');
-      response.body.should.have.property('description');
-      response.body.should.have.property('_id').eql(collection.id);
+      response.body[0].should.be.a('object');
+      response.body[0].should.have.property('name');
+      response.body[0].should.have.property('description');
+      response.body[0].should.have.property('_id').eql(catalog.id);
     });
   });
 
   /**
-   * Test PUT /collections/:id
+   * Test PUT /catalogs/:id
    */
-  describe('UPDATE collections/:id', () => {
-    it('should update the collection with the specified id', async () => {
+  describe('UPDATE catalogs/:id', () => {
+    it('should update the catalog with the specified id', async () => {
 
       let newCollection = { description: "Collection of Vinyl records from the 1970s" };
 
       const response = await chai.request(app)
-          .put('/collections/' + collection.id)
+          .put('/catalogs/' + catalog.id)
           .send(newCollection);
 
       response.should.have.status(200);
@@ -88,13 +88,13 @@ describe('Collection Test', () => {
   })
 
   /**
-   * Test DELETE /collections/:id
+   * Test DELETE /catalogs/:id
    */
-  describe('DELETE collections/:id', () => {
-    it('should delete the collection with the specified id', async () => {
+  describe('DELETE catalogs/:id', () => {
+    it('should delete the catalog with the specified id', async () => {
 
       const response = await chai.request(app)
-          .delete('/collections/' + collection.id);
+          .delete('/catalogs/' + catalog.id);
 
       response.should.have.status(200);
       response.body.should.be.a('object');

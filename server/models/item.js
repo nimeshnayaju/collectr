@@ -2,9 +2,9 @@ const mongoose = require('mongoose');
 
 const ItemSchema = new mongoose.Schema({
   name: { type: String, required: true },
-  date: { type: Date, default: Date.now() },
+  date: { type: Date },
   manufacturer: { type: String },
-  collection: { type:  mongoose.Schema.Types.ObjectId, ref: 'Collection' }
+  catalog: { type:  mongoose.Schema.Types.ObjectId, ref: 'Catalog', required: true } // Reference to the associated Collection object
 });
 
 module.exports = mongoose.model('Item', ItemSchema);
