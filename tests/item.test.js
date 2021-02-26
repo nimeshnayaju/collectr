@@ -28,7 +28,7 @@ describe('Item Test', () => {
       .post('/catalogs')
       .send(catalog);
 
-    catalog.id = response.body.catalog._id;
+    catalog.id = response.body._id;
     item.catalog = response.body._id;
   });
 
