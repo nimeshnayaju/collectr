@@ -54,8 +54,24 @@ const getCatalogItems = async (req, res) => {
     }
 };
 
+
+const updateItem = async (req, res) => {
+    const { id } = req.params;
+    const { name, date, manufacturer, catalog } = req.body;
+
+    const item = new Item({ _id: id, name, date, manufacturer, catalog });
+
+    try {
+        const updatedItem = await Item.findByIdAndUpdate(id, item, { new: true });
+        res.status(StatusCode.OK).json( updatedItem );
+    } catch (err) {
+        res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
+    }
+}
+
 module.exports = {
     addItem,
     getItems,
     getCatalogItems,
+    updateItem
 };
