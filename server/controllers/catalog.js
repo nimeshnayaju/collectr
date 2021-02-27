@@ -8,14 +8,12 @@ const StatusCode = require('../helpers/constants');
  * @returns {Promise<void>} the promise indicating success
  */
 const getCatalogs = async (req, res) => {
-
     try {
         const catalogs = await Catalog.find(); // Find all Catalog objects
         res.status(StatusCode.OK).json( catalogs );
     } catch (err) {
         res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
-    }
-
+  }
 };
 
 /**
@@ -25,10 +23,9 @@ const getCatalogs = async (req, res) => {
  * @returns {Promise<void>} the promise indicating success
  */
 const addCatalog = async (req, res) => {
-
     const { name, description } = req.body;
 
-    let catalog = new Catalog({ name, description });
+    const catalog = new Catalog({ name, description });
 
     try {
         const newCatalog = await catalog.save();
@@ -36,7 +33,6 @@ const addCatalog = async (req, res) => {
     } catch (err) {
         res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
     }
-
 };
 
 /**
@@ -46,7 +42,6 @@ const addCatalog = async (req, res) => {
  * @returns {Promise<void>} the promise indicating success
  */
 const getCatalog = async (req, res) => {
-
     const { id } = req.params;
 
     try {
@@ -55,8 +50,7 @@ const getCatalog = async (req, res) => {
     } catch (err) {
         res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
     }
-
-}
+};
 
 /**
  * Updates a pre-existing Catalog object
@@ -65,11 +59,10 @@ const getCatalog = async (req, res) => {
  * @returns {Promise<void>} the promise indicating success
  */
 const updateCatalog = async (req, res) => {
-
     const { id } = req.params;
     const { name, description } = req.body;
 
-    let catalog = new Catalog({ _id: id, name: name, description: description });
+    const catalog = new Catalog({ _id: id, name, description });
 
     try {
         const updatedCatalog = await Catalog.findByIdAndUpdate(id, catalog, { new: true });
@@ -77,8 +70,7 @@ const updateCatalog = async (req, res) => {
     } catch (err) {
         res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
     }
-
-}
+};
 
 /**
  * Delete a specific Catalog object
@@ -87,7 +79,6 @@ const updateCatalog = async (req, res) => {
  * @returns {Promise<void>} the promise indicating success
  */
 const deleteCatalog = async (req, res) => {
-
     const { id } = req.params;
 
     try {
@@ -96,13 +87,12 @@ const deleteCatalog = async (req, res) => {
     } catch (err) {
         res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
     }
-
-}
+};
 
 module.exports = {
     getCatalogs,
     addCatalog,
     getCatalog,
     updateCatalog,
-    deleteCatalog
-}
+    deleteCatalog,
+};

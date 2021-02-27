@@ -1,20 +1,22 @@
 const chai = require('chai');
 const chaiHttp = require('chai-http');
 const app = require('../server/server');
+const statusCode = require('../server/helpers/constants');
 const Item = require('../server/models/item');
+
 const should = chai.should();
 
 chai.use(chaiHttp);
 
-let catalog = {
-    name: "Vintage Guitar",
-    description: "Collection of sought after guitars from famous musicians"
+const catalog = {
+  name: 'Vintage Guitar',
+  description: 'Collection of sought after guitars from famous musicians',
 };
-let item = {
-    name: "1912 Gibson Mandolin-Guitar Mfg. Co. Style U",
-    date: "1912",
-    manufacturer: "Gibson"
-}
+const item = {
+  name: '1912 Gibson Mandolin-Guitar Mfg. Co. Style U',
+  date: '1912',
+  manufacturer: 'Gibson',
+};
 
 describe('Item Test', () => {
     before(async () => {
@@ -24,37 +26,58 @@ describe('Item Test', () => {
         const response = await chai
             .request(app)
             .post('/catalogs')
-            .send(catalog)
+            .send(catalog);
 
+        catalog.id = response.body._id;
         item.catalog = response.body._id;
-    })
+  });
 
-    /**
-     * Test POST /items
-     */
-    describe('POST /items', () => {
-        it('should create a new item', async () => {
+/**
+* Test POST /items
+*/
+describe('POST /items', () => {
+    it('should create a new item', async () => {
+        // Add the mock Item object
+        const response = await chai
+            .request(app)
+            .post('/items')
+            .send(item);
 
-            // Add the mock Item object
-            const response = await chai
-                .request(app)
-                .post('/items')
-                .send(item);
+        item.id = response.body._id;
 
-            item.id = response.body._id;
-
-            response.should.have.status(201);
-            response.body.should.be.a('object');
-            response.body.should.have.property('name');
-            response.body.should.have.property('manufacturer');
-            response.body.should.have.property('date');
-            response.body.should.have.property('catalog');
-        });
+        response.should.have.status(statusCode.CREATED);
+        response.body.should.be.a('object');
+        response.body.should.have.property('name');
+        response.body.should.have.property('manufacturer');
+        response.body.should.have.property('date');
+        response.body.should.have.property('catalog');
     });
+});
 
-})
+/**
+* Test GET /items/
+*/
+describe('GET /items/', () => {
+    it('should list all items', async () => {
+        const response = await chai.request(app)
+            .get('/items/' + catalog.id);
 
+        response.should.have.status(statusCode.OK);
+        response.body.should.be.a('array');
+        response.body.length.should.be.eql(1);
+    });
+});
 
-
-
-
+/**
+* Test GET /items/catalog/:id
+*/
+describe('GET /items/catalog/', () => {
+    it('should list all items in a catalog', async () => {
+        const response = await chai.request(app)
+            .get('/items/catalog/' + catalog.id);
+        response.should.have.status(statusCode.OK);
+        response.body.should.be.a('array');
+        response.body.length.should.be.eql(1);
+    });
+  });
+});
