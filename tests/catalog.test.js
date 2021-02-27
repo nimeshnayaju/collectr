@@ -61,10 +61,11 @@ describe('GET catalogs/:id', () => {
             .get(`/catalogs/${catalog.id}`);
 
         response.should.have.status(statusCode.OK);
-        response.body[0].should.be.a('object');
-        response.body[0].should.have.property('name');
-        response.body[0].should.have.property('description');
-        response.body[0].should.have.property('_id').eql(catalog.id);
+        response.body.should.be.a('object');
+        response.body.should.have.property('name');
+        response.body.should.have.property('description');
+        response.body.should.have.property('items');
+        response.body.should.have.property('_id').eql(catalog.id);
     });
 });
 
