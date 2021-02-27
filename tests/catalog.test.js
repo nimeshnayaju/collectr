@@ -89,9 +89,9 @@ describe('UPDATE catalogs/:id', () => {
 * Test DELETE /catalogs/:id
 */
 describe('DELETE catalogs/:id', () => {
-    it('should delete the catalog with the specified id', async () =>
+    it('should delete the catalog with the specified id', async () => {
         const response = await chai.request(app)
-        .delete(`/catalogs/${catalog.id}`);
+            .delete(`/catalogs/${catalog.id}`);
 
         response.should.have.status(statusCode.OK);
         response.body.should.be.a('object');

@@ -9,10 +9,10 @@ const StatusCode = require('../helpers/constants');
  */
 const getCatalogs = async (req, res) => {
     try {
-    const catalogs = await Catalog.find(); // Find all Catalog objects
-    res.status(StatusCode.OK).json(catalogs);
+        const catalogs = await Catalog.find(); // Find all Catalog objects
+        res.status(StatusCode.OK).json( catalogs );
     } catch (err) {
-    res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
+        res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
   }
 };
 
@@ -29,7 +29,7 @@ const addCatalog = async (req, res) => {
 
     try {
         const newCatalog = await catalog.save();
-        res.status(StatusCode.CREATED).json(newCatalog);
+        res.status(StatusCode.CREATED).json( newCatalog );
     } catch (err) {
         res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
     }
@@ -46,7 +46,7 @@ const getCatalog = async (req, res) => {
 
     try {
         const catalog = await Catalog.findById(id);
-        res.status(StatusCode.OK).json(catalog);
+        res.status(StatusCode.OK).json( catalog );
     } catch (err) {
         res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
     }
@@ -66,7 +66,7 @@ const updateCatalog = async (req, res) => {
 
     try {
         const updatedCatalog = await Catalog.findByIdAndUpdate(id, catalog, { new: true });
-        res.status(StatusCode.OK).json(updatedCatalog);
+        res.status(StatusCode.OK).json( updatedCatalog );
     } catch (err) {
         res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
     }
@@ -83,7 +83,7 @@ const deleteCatalog = async (req, res) => {
 
     try {
         const deletedCatalog = await Catalog.findByIdAndRemove(id);
-        res.status(StatusCode.OK).json(deletedCatalog);
+        res.status(StatusCode.OK).json( deletedCatalog );
     } catch (err) {
         res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
     }
