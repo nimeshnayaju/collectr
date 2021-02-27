@@ -19,64 +19,65 @@ const item = {
 };
 
 describe('Item Test', () => {
-  before(async () => {
-    // Clear the items before the test
-    await Item.deleteMany({});
-    // Add a mock Catalog object
-    const response = await chai
-      .request(app)
-      .post('/catalogs')
-      .send(catalog);
+    before(async () => {
+        // Clear the items before the test
+        await Item.deleteMany({});
+        // Add a mock Catalog object
+        const response = await chai
+            .request(app)
+            .post('/catalogs')
+            .send(catalog);
 
-    catalog.id = response.body._id;
-    item.catalog = response.body._id;
+        catalog.id = response.body._id;
+        item.catalog = response.body._id;
   });
 
-  /**
-     * Test POST /items
-     */
-  describe('POST /items', () => {
+/**
+* Test POST /items
+*/
+describe('POST /items', () => {
     it('should create a new item', async () => {
-      // Add the mock Item object
-      const response = await chai
-        .request(app)
-        .post('/items')
-        .send(item);
+        // Add the mock Item object
+        const response = await chai
+            .request(app)
+            .post('/items')
+            .send(item);
 
-      item.id = response.body._id;
+        item.id = response.body._id;
 
-      response.should.have.status(statusCode.CREATED);
-      response.body.should.be.a('object');
-      response.body.should.have.property('name');
-      response.body.should.have.property('manufacturer');
-      response.body.should.have.property('date');
-      response.body.should.have.property('catalog');
+        response.should.have.status(statusCode.CREATED);
+        response.body.should.be.a('object');
+        response.body.should.have.property('name');
+        response.body.should.have.property('manufacturer');
+        response.body.should.have.property('date');
+        response.body.should.have.property('catalog');
     });
-  });
+});
 
-  /**
-   * Test GET /items/
-   */
-  describe('GET /items/', () => {
+/**
+* Test GET /items/
+*/
+describe('GET /items/', () => {
     it('should list all items', async () => {
-      const response = await chai.request(app)
-          .get('/items/' + catalog.id);
-      response.should.have.status(statusCode.OK);
-      response.body.should.be.a('array');
-      response.body.length.should.be.eql(1);
-    });
-  });
+        const response = await chai.request(app)
+            .get('/items/' + catalog.id);
 
-  /**
-   * Test GET /items/catalog/:id
-   */
-  describe('GET /items/catalog/', () => {
+        response.should.have.status(statusCode.OK);
+        response.body.should.be.a('array');
+        response.body.length.should.be.eql(1);
+    });
+});
+
+/**
+* Test GET /items/catalog/:id
+*/
+describe('GET /items/catalog/', () => {
     it('should list all items in a catalog', async () => {
-      const response = await chai.request(app)
-          .get('/items/catalog/' + catalog.id);
-      response.should.have.status(statusCode.OK);
-      response.body.should.be.a('array');
-      response.body.length.should.be.eql(1);
+        const response = await chai.request(app)
+            .get('/items/catalog/' + catalog.id);
+        response.should.have.status(statusCode.OK);
+        response.body.should.be.a('array');
+        response.body.length.should.be.eql(1);
     });
   });
 });
