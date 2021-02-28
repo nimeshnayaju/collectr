@@ -1,14 +1,23 @@
-const Record = require('../models/item');
+const Item = require('../models/item');
 const StatusCode = require('../helpers/constants');
 
-const getItem = async (req, res) -> {
-	const { id } = req.params;
-	
-	try {
-	  const item = await Item.findById(id); // <-- does this need '.populate()? if so, what should be its param?
-	  res.status(StatusCode.OK).json(item);
-	} catch (err) {
-	  res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
-	}	
+/**
+ * Gets a specific item
+ * @param req request object containing information about HTTP request
+ * @param res the response object used for sending back the desired HTTP response
+ * @returns {Promise<void>} the promise indicating success
+ */
+const getItem = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+      const item = await Item.findById(id);
+      res.status(StatusCode.OK).json(item);
+  } catch (err) {
+      res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
+  }
 };
 
+module.exports = {
+	getItem,
+};
