@@ -1,12 +1,11 @@
 const express = require('express');
 
 const router = express.Router();
-const recordController = require('../controllers/item');
+const itemController = require('../controllers/item');
 
-// router.get('/', recordController.getItems);
-// router.get('/:id', recordController.getRecord);
-// router.post('/', recordController.addItem);
-// router.put('/:id', recordController.updateRecord);
-// router.delete('/:id', recordController.deleteRecord);
+router.post('/', itemController.addItem);
+router.get('/:id', itemController.getItems);
+router.get('/catalog/:id', itemController.getCatalogItems);
+router.get('/item/:id', itemController.getItem);
 
 module.exports = router;
