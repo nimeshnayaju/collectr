@@ -2,6 +2,7 @@ const express = require('express');
 
 const app = express();
 const config = require('./config');
+const cors = require('cors');
 
 // Set up Mongoose connection
 require('./db/mongoose');
@@ -12,6 +13,7 @@ const catalogRoutes = require('./routes/catalog');
 const itemRoutes = require('./routes/item');
 
 app.use(express.json()); // Parse application/json (recognize the incoming request object as a JSON object)
+app.use(cors());
 
 // App route configuration
 app.use('/', indexRoute); // Index Route

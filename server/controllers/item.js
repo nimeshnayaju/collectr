@@ -9,13 +9,26 @@ const StatusCode = require('../helpers/constants');
  * @returns {Promise<void>} the promise indicating success
  */
 const addItem = async (req, res) => {
-    const { name, date, manufacturer, catalog } = req.body;
+    const { name, date, manufacturer } = req.body;
+    const catalogId = req.body.catalog;
 
-    const item = new Item({ name, date, manufacturer, catalog });
+    const item = new Item({ name, date, manufacturer });
 
     try {
-        const newItem = await item.save();
-        res.status(StatusCode.CREATED).json( newItem );
+        // check if the catalog id sent in the request body is a valid id or not
+        let catalog = await Catalog.findById(catalogId);
+        if (catalog != null) {
+            try {
+                const newItem = await item.save();
+
+                catalog.items.push(newItem._id);
+                catalog.save();
+                
+                res.status(StatusCode.CREATED).json( newItem );
+            } catch (err) {
+                res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
+            }
+        }
     } catch (err) {
         res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
     }
@@ -36,26 +49,7 @@ const getItems = async (req, res) => {
     }
 };
 
-/**
- * Gets all items in a specific catalog
- * @param req request object containing information about HTTP request
- * @param res the response object used for sending back the desired HTTP response
- * @returns {Promise<void>} the promise indicating success
- */
-const getCatalogItems = async (req, res) => {
-    const { id } = req.params;
-
-    try {
-        const catalog = await Catalog.findById(id); // get the specified catalog by id
-        const items = await Item.find({ catalog: catalog._id }).populate('catalog'); // get the items by catalog
-        res.status(StatusCode.OK).json( items );
-    } catch (err) {
-        res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
-    }
-};
-
 module.exports = {
     addItem,
-    getItems,
-    getCatalogItems,
+    getItems
 };

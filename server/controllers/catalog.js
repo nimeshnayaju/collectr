@@ -45,7 +45,7 @@ const getCatalog = async (req, res) => {
     const { id } = req.params;
 
     try {
-        const catalog = await Catalog.findById(id);
+        const catalog = await Catalog.findById(id).populate('items');
         res.status(StatusCode.OK).json( catalog );
     } catch (err) {
         res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
