@@ -66,4 +66,27 @@ describe('Item Test', () => {
             response.body.length.should.be.eql(1);
         });
     });
+
+    /**
+     * Test PUT /items/:id
+     */
+    describe('UPDATE items/:id', () => {
+        it('should update the item with the specified id', async () => {
+
+            const newItem = {
+                name: '1912 Gibson Mandolin-Guitar Mfg. Co. Style W',
+                date: '1912',
+                manufacturer: 'Gibson',
+            };
+
+            const response = await chai.request(app)
+                .put(`/items/${item.id}`)
+                .send(newitem);
+
+            response.should.have.status(statusCode.OK);
+            response.body.should.be.a('object');
+            response.body.should.have.property('description').eql(newItem.description);
+        });
+    });
 });
+
