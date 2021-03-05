@@ -13,7 +13,7 @@ const catalog = {
   description: 'Collection of sought after guitars from famous musicians',
 };
 const item = {
-  name: 'Gibson Mandolin-Guitar Mfg. Co. Style U',
+  name: '1912 Gibson Mandolin-Guitar Mfg. Co. Style U',
   date: '1912',
   manufacturer: 'Gibson',
 };
@@ -54,7 +54,7 @@ describe('Item Test', () => {
     });
 
     /**
-    * Test GET /items
+    * Test GET /items/
     */
     describe('GET /items/', () => {
         it('should list all items', async () => {
@@ -66,7 +66,7 @@ describe('Item Test', () => {
             response.body.length.should.be.eql(1);
         });
     });
-    
+
     /**
      * Test PUT /items/:id
      */
@@ -81,12 +81,14 @@ describe('Item Test', () => {
 
             const response = await chai.request(app)
                 .put(`/items/${item.id}`)
-                .send(newitem);
+                .send(newItem);
 
             response.should.have.status(statusCode.OK);
             response.body.should.be.a('object');
-            response.body.should.have.property('description').eql(newItem.description);
+            response.body.should.have.property('name').eql(newItem.name);
+            response.body.should.have.property('manufacturer').eql(newItem.manufacturer);
         });
     });
+
 });
 
