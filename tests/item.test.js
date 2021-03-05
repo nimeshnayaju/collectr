@@ -66,7 +66,7 @@ describe('Item Test', () => {
             response.body.length.should.be.eql(1);
         });
     });
-
+    
     /**
      * Test PUT /items/:id
      */
