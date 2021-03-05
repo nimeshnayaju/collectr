@@ -97,7 +97,7 @@ describe('UPDATE items/:id', () => {
 
         const response = await chai.request(app)
             .put(`/items/${item.id}`)
-            .send(newitem);
+            .send(newItem);
 
         response.should.have.status(statusCode.OK);
         response.body.should.be.a('object');
