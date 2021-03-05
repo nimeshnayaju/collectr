@@ -84,7 +84,7 @@ describe('GET /items/catalog/', () => {
 
 
 /**
- * Test PUT /catalogs/:id
+ * Test PUT /items/:id
  */
 describe('UPDATE items/:id', () => {
     it('should update the item with the specified id', async () => {
