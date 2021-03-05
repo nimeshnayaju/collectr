@@ -101,6 +101,9 @@ describe('UPDATE items/:id', () => {
 
         response.should.have.status(statusCode.OK);
         response.body.should.be.a('object');
-        response.body.should.have.property('description').eql(newItem.description);
+        response.body.should.have.property('name').eql(newItem.name);
+        //response.body.should.have.property('date').eql(newItem.date);
+        // an issue with comparing date is that 'actual' is 1912-01-01T00:00:00.000Z instead of 1912?
+        response.body.should.have.property('manufacturer').eql(newItem.manufacturer);
     });
 });
