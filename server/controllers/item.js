@@ -55,6 +55,12 @@ const getCatalogItems = async (req, res) => {
 };
 
 
+/**
+ * Updates item by id
+ * @param req request object containing information about HTTP request
+ * @param res the response object used for sending back the desired HTTP response
+ * @returns {Promise<void>} the promise indicating success
+ */
 const updateItem = async (req, res) => {
     const { id } = req.params;
     const { name, date, manufacturer, catalog } = req.body;
