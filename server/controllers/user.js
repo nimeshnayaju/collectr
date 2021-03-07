@@ -19,9 +19,27 @@ const login = async (req, res) => {
  */
  const signup = async (req, res) => {
     // Fill in here
-}
+    const {
+        firstName, lastName, email, password,
+    } = req.body;
+
+    try{
+        const newUser = await User.create({
+            firstName,
+            lastName,
+            email,
+            password,
+        });
+        res.status(StatusCode.CREATED).json(newUser);
+    } catch (err) {
+        console.log(err);
+        res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
+    }
+
+    res.json(StatusCode.OK);
+};
 
 module.exports = {
     login,
-    signup
+    signup,
 }
