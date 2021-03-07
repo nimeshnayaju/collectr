@@ -27,14 +27,13 @@ describe('Item Test', () => {
             .request(app)
             .post('/catalogs')
             .send(catalog);
-
         catalog.id = response.body._id;
         item.catalog = response.body._id;
     });
 
     /**
-     * Test POST /items
-     */
+    * Test POST /items
+    */
     describe('POST /items', () => {
         it('should create a new item', async () => {
             // Add the mock Item object
@@ -54,12 +53,12 @@ describe('Item Test', () => {
     });
 
     /**
-     * Test GET /items/
-     */
+    * Test GET /items/
+    */
     describe('GET /items/', () => {
         it('should list all items', async () => {
             const response = await chai.request(app)
-                .get('/items/' + catalog.id);
+                .get('/items');
 
             response.should.have.status(statusCode.OK);
             response.body.should.be.a('array');
@@ -107,3 +106,4 @@ describe('Item Test', () => {
     });
 
 });
+
