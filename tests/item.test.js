@@ -59,7 +59,7 @@ describe('Item Test', () => {
     describe('GET /items/', () => {
         it('should list all items', async () => {
             const response = await chai.request(app)
-                .get('/items/' + catalog.id);
+                .get('/items');
 
             response.should.have.status(statusCode.OK);
             response.body.should.be.a('array');
