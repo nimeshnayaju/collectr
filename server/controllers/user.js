@@ -28,18 +28,15 @@ const login = async (req, res) => {
         });
         if (!user)
             return res.status(StatusCode.BAD_REQUEST).json({
-                message: "User Not Exist"
             });
-        const isMatch = await bcrypt.compare(password, User.password);
-        if (!isMatch)
+        const isPassword = await bcrypt.compare(password, User.password);
+        if (!isPassword)
             return res.status(StatusCode.BAD_REQUEST).json({
-                message: "Incorrect Password !"
             });
     }
     catch (e) {
         console.error(e);
         res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
-            message: "Server Error"
         });
     }
 }
