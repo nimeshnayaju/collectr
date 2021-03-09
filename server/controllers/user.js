@@ -17,7 +17,7 @@ const login = async (req, res) => {
     check("password", "Enter password").isLength({min: 6})
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        return res.status(400).json({
+        return res.status(StatusCode.BAD_REQUEST).json({
             errors: errors.array()
         });
     }
@@ -27,18 +27,18 @@ const login = async (req, res) => {
             email
         });
         if (!user)
-            return res.status(400).json({
+            return res.status(StatusCode.BAD_REQUEST).json({
                 message: "User Not Exist"
             });
         const isMatch = await bcrypt.compare(password, User.password);
         if (!isMatch)
-            return res.status(400).json({
+            return res.status(StatusCode.BAD_REQUEST).json({
                 message: "Incorrect Password !"
             });
     }
     catch (e) {
         console.error(e);
-        res.status(500).json({
+        res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
             message: "Server Error"
         });
     }
