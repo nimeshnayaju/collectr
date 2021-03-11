@@ -44,16 +44,16 @@ const getItems = async (req, res) => {
 };
 
 /**
- * Updates item by id
+ * Updates a pre-existing Item object
  * @param req request object containing information about HTTP request
  * @param res the response object used for sending back the desired HTTP response
  * @returns {Promise<void>} the promise indicating success
  */
 const updateItem = async (req, res) => {
     const { id } = req.params;
-    const { name, date, manufacturer, catalog } = req.body;
+    const { name, date, manufacturer } = req.body;
 
-    const item = new Item({ _id: id, name, date, manufacturer, catalog });
+    const item = new Item({ _id: id, name, date, manufacturer });
 
     try {
         const updatedItem = await Item.findByIdAndUpdate(id, item, { new: true });

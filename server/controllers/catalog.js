@@ -60,9 +60,9 @@ const getCatalog = async (req, res) => {
  */
 const updateCatalog = async (req, res) => {
     const { id } = req.params;
-    const { name, description } = req.body;
+    const { name, description, items } = req.body;
 
-    const catalog = new Catalog({ _id: id, name, description });
+    const catalog = new Catalog({ name, description, items });
 
     try {
         const updatedCatalog = await Catalog.findByIdAndUpdate(id, catalog, { new: true });
