@@ -9,13 +9,13 @@ const should = chai.should();
 chai.use(chaiHttp);
 
 const catalog = {
-  name: 'Vintage Guitar',
-  description: 'Collection of sought after guitars from famous musicians',
+    name: 'Vintage Guitar',
+    description: 'Collection of sought after guitars from famous musicians',
 };
 const item = {
-  name: '1912 Gibson Mandolin-Guitar Mfg. Co. Style U',
-  date: '1912',
-  manufacturer: 'Gibson',
+    name: '1912 Gibson Mandolin-Guitar Mfg. Co. Style U',
+    date: '1912',
+    manufacturer: 'Gibson',
 };
 
 describe('Item Test', () => {
@@ -27,7 +27,6 @@ describe('Item Test', () => {
             .request(app)
             .post('/catalogs')
             .send(catalog);
-
         catalog.id = response.body._id;
         item.catalog = response.body._id;
     });
@@ -59,11 +58,27 @@ describe('Item Test', () => {
     describe('GET /items/', () => {
         it('should list all items', async () => {
             const response = await chai.request(app)
-                .get('/items/' + catalog.id);
+                .get('/items');
 
             response.should.have.status(statusCode.OK);
             response.body.should.be.a('array');
             response.body.length.should.be.eql(1);
+        });
+    });
+
+    /**
+     * Test GET /items/:id
+     */
+    describe('GET /items/:id', () => {
+        it('should get item with specified id', async () => {
+            const response = await chai.request(app)
+                .get(`/items/${item.id}`);
+
+            response.should.have.status(statusCode.OK);
+            response.body.should.be.a('object');
+            response.body.should.have.property('name');
+            response.body.should.have.property('manufacturer');
+            response.body.should.have.property('_id').eql(item.id);
         });
     });
 

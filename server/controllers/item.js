@@ -2,12 +2,6 @@ const Item = require('../models/item');
 const Catalog = require('../models/catalog');
 const StatusCode = require('../helpers/constants');
 
-/**
- * Adds a new Item object (to a Catalog)
- * @param req request object containing information about HTTP request
- * @param res the response object used for sending back the desired HTTP response
- * @returns {Promise<void>} the promise indicating success
- */
 const addItem = async (req, res) => {
     const { name, date, manufacturer } = req.body;
     const catalogId = req.body.catalog;
@@ -69,8 +63,26 @@ const updateItem = async (req, res) => {
     }
 }
 
+/**
+ * Gets a specific Item object
+ * @param req request object containing information about HTTP request
+ * @param res the response object used for sending back the desired HTTP response
+ * @returns {Promise<void>} the promise indicating success
+ */
+ const getItem = async (req, res) => {
+    const { id } = req.params;
+  
+    try {
+        const item = await Item.findById(id);
+        res.status(StatusCode.OK).json(item);
+    } catch (err) {
+        res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
+    }
+};
+
 module.exports = {
     addItem,
     getItems,
-    updateItem
+    updateItem,
+    getItem
 };

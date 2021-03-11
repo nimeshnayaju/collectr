@@ -16,14 +16,15 @@ const newUser = {
 };
 
 describe('User Test', () => {
-  /**
-    * Test POST /signup
-    */
+
   before(async () => {
     // Clear the user before the test
     await User.deleteMany({});
   });
 
+  /**
+  * Test POST /signup
+  */
   describe('POST /signup', () => {
     it('should register a new user', async () => {
       // Add the mock user object
@@ -32,7 +33,7 @@ describe('User Test', () => {
         .post('/users/signup')
         .send(newUser);
 
-      newUser.email = response.body.email;
+      newUser.id = response.body._id;
 
       response.should.have.status(statusCode.CREATED);
       response.body.should.be.a('object');
