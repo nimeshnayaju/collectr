@@ -8,7 +8,7 @@
     "test": "mocha --timeout 10000 \"./tests/*.test.js\" -exit"
   },
   "dependencies": {
-    "bcryptjs": "^2.4.3",
+    "bcrypt": "^5.0.1",
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
@@ -20,8 +20,6 @@
     "eslint": "^7.19.0",
     "eslint-config-airbnb-base": "^14.2.1",
     "eslint-plugin-import": "^2.22.1",
-    "express-validator": "^6.10.0",
-    "jsonwebtoken": "^8.5.1",
     "mocha": "^8.3.0"
   }
 }
