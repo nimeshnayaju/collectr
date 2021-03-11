@@ -22,13 +22,6 @@ describe('User Test', () => {
   before(async () => {
     // Clear the user before the test
     await User.deleteMany({});
-    // Add a mock user object
-    const response = await chai
-      .request(app)
-      .post('/signup')
-      .send(newUser);
-
-    newUser.email = response.body.email;
   });
 
   describe('POST /signup', () => {
@@ -36,7 +29,7 @@ describe('User Test', () => {
       // Add the mock user object
       const response = await chai
         .request(app)
-        .post('/signup')
+        .post('/users/signup')
         .send(newUser);
 
       newUser.email = response.body.email;
