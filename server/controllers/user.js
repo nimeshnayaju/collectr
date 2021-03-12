@@ -2,7 +2,6 @@ const bcrypt = require('bcrypt');
 const User = require('../models/user');
 const StatusCode = require('../helpers/constants');
 const express = require("express");
-const { check, validationResult} = require("express-validator/check");
 const router = express.Router();
 const jwt = require("jsonwebtoken");
 /**
@@ -17,6 +16,10 @@ const login = async (req, res) => {
         let user = await User.findOne({email});
         if (!user)
             res.status(StatusCode.BAD_REQUEST).json({message: "User not found"});
+        if (!validateEmail(req.body.email))
+            res.status(StatusCode.BAD_REQUEST).json({ message: 'Invalid email format' });
+        if (req.body.password.length < 6)
+            res.status(StatusCode.BAD_REQUEST).json({message: "Password must be more than 6 characters"});
         else {
             const isPassword = await bcrypt.compare(password, user.password);
             if (!isPassword)
@@ -45,36 +48,39 @@ const login = async (req, res) => {
  */
 const signup = async (req, res) => {
   try {
-    check("email", "Enter email").isEmail();
-    check("password", "Enter password").isLength({min: 6})
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-       res.status(StatusCode.BAD_REQUEST).json({message: "Wrong format for email or password"});
-    }
     // find if the user already exist
     let user = await User.findOne({ email: req.body.email });
-    if (user) {
+    if (user)
+        res.status(StatusCode.BAD_REQUEST).json({ message: 'User already found!' });
+    if (!validateEmail(req.body.email))
+        res.status(StatusCode.BAD_REQUEST).json({message: 'Invalid email format'});
+    if (req.body.password.length < 6)
+            res.status(StatusCode.BAD_REQUEST).json({message: "Password must be more than 6 characters"});
+    else {
 
-      res.status(StatusCode.BAD_REQUEST).json({ message: 'User already found!' });
-    } else {
+            const {firstName, lastName, email, password} = req.body;
+            user = new User({firstName, lastName, email, password});
 
-      const { firstName, lastName, email, password } = req.body;
-      user = new User({ firstName, lastName, email, password });
+            // encrypt the raw password
+            const encrypt = await bcrypt.genSalt(5);
+            user.password = await bcrypt.hash(user.password, encrypt);
 
-      // encrypt the raw password
-      const encrypt = await bcrypt.genSalt(5);
-      user.password = await bcrypt.hash(user.password, encrypt);
-
-      const newUser = await user.save();
-      res.status(StatusCode.CREATED).json(newUser);
-    }
-
+            const newUser = await user.save();
+            res.status(StatusCode.CREATED).json(newUser);
+        }
   } catch (err) {
 
     res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
 
   }
 };
+
+/* function that checks the format of a given email address */
+function validateEmail(email)
+{
+    var re = /\S+@\S+\.\S+/;
+    return re.test(email);
+}
 
 module.exports = {
   login,

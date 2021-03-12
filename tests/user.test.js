@@ -55,12 +55,6 @@ describe('User Test', () => {
     describe('POST /login', () => {
         it('should log a user in', async () => {
         // mock user object
-        const newUser = {
-          firstName: 'Ludwig',
-          lastName: 'Beethoven',
-          email: 'lbee@music.com',
-          password: 'ilovepiano',
-        };
         const response = await chai
             .request(app)
             .post('/users/login')
