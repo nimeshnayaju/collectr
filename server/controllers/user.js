@@ -4,7 +4,7 @@ const StatusCode = require('../helpers/constants');
 const express = require("express");
 const { check, validationResult} = require("express-validator/check");
 const router = express.Router();
-
+const jwt = require("jsonwebtoken");
 /**
  * Logs a user in using their email and password
  * @param req request object containing information about HTTP request
@@ -22,11 +22,17 @@ const login = async (req, res) => {
             if (!isPassword)
                 res.status(StatusCode.BAD_REQUEST).json({message: "Incorrect Password"});
             else {
-                res.status(StatusCode.OK).json({message: "Login Successful"})
+                const payload = {user: {id: user.id}};
+                jwt.sign(payload, "key", {expiresIn: 3600},
+                    (err, token) => {
+                        if (err) throw err;
+                        res.status(StatusCode.OK).json({token});
+                    }
+                );
             }
         }
     }
-    catch (err) {
+        catch (err) {
         res.status(StatusCode.BAD_REQUEST).json({message: "Error"});
     }
 }

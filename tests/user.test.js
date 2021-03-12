@@ -71,10 +71,6 @@ describe('User Test', () => {
 
         response.should.have.status(statusCode.OK);
         response.body.should.be.a('object');
-        response.body.should.have.property('email');
-        response.body.should.have.property('password');
-        // response.body.should.have.property('email');
-        // response.body.should.have.property('password');
         });
     });
 });
