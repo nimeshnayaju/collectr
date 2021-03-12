@@ -3,8 +3,6 @@ const User = require('../models/user');
 const StatusCode = require('../helpers/constants');
 const express = require("express");
 const { check, validationResult} = require("express-validator/check");
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
 const router = express.Router();
 
 /**
@@ -14,31 +12,22 @@ const router = express.Router();
  * @returns {Promise<void>} the promise indicating success
  */
 const login = async (req, res) => {
-    check("email", "Enter email").isEmail();
-    check("password", "Enter password").isLength({min: 6})
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(StatusCode.BAD_REQUEST).json({
-            errors: errors.array()
-        });
-    }
-    const {email, password} = req.body;
     try {
-        let user = await User.findOne({
-            email
-        });
+        const {email, password} = req.body;
+        let user = await User.findOne({email});
         if (!user)
-            return res.status(StatusCode.BAD_REQUEST).json({
-            });
-        const isPassword = await bcrypt.compare(password, User.password);
-        if (!isPassword)
-            return res.status(StatusCode.BAD_REQUEST).json({
-            });
+            res.status(StatusCode.BAD_REQUEST).json({message: "User not found"});
+        else {
+            const isPassword = await bcrypt.compare(password, user.password);
+            if (!isPassword)
+                res.status(StatusCode.BAD_REQUEST).json({message: "Incorrect Password"});
+            else {
+                res.status(StatusCode.OK).json({message: "Login Successful"})
+            }
+        }
     }
-    catch (e) {
-        console.error(e);
-        res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
-        });
+    catch (err) {
+        res.status(StatusCode.BAD_REQUEST).json({message: "Error"});
     }
 }
 
@@ -50,12 +39,17 @@ const login = async (req, res) => {
  */
 const signup = async (req, res) => {
   try {
+    check("email", "Enter email").isEmail();
+    check("password", "Enter password").isLength({min: 6})
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+       res.status(StatusCode.BAD_REQUEST).json({message: "Wrong format for email or password"});
+    }
     // find if the user already exist
     let user = await User.findOne({ email: req.body.email });
     if (user) {
 
       res.status(StatusCode.BAD_REQUEST).json({ message: 'User already found!' });
-
     } else {
 
       const { firstName, lastName, email, password } = req.body;
