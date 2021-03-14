@@ -15,6 +15,11 @@ const newUser = {
   password: 'ilovepiano',
 };
 
+const loginInfo = {
+  email: 'lbee@music.com',
+  password: 'ilovepiano',
+};
+
 describe('User Test', () => {
 
   before(async () => {
@@ -44,12 +49,22 @@ describe('User Test', () => {
     });
   });
 
-  //     /**
-  //     * Test POST /login
-  //     */
-  //     describe('POST /login', () => {
-  //         it('should log a user in', async () => {
+    /**
+    * Test POST /login
+    */
+    describe('POST /login', () => {
+        it('should log a user in', async () => {
+        // mock user object
+        const response = await chai
+            .request(app)
+            .post('/users/login')
+            .send(loginInfo)
 
-//         });
-//     });
+        // loginInfo.id = response.body._id;
+        loginInfo.id = response.body._id;
+
+        response.should.have.status(statusCode.OK);
+        response.body.should.be.a('object');
+        });
+    });
 });

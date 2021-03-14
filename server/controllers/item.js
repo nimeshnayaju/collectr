@@ -80,9 +80,28 @@ const updateItem = async (req, res) => {
     }
 };
 
+/**
+ * Delete an Item object (from a Catalog)
+ * @param req request object containing information about HTTP request
+ * @param res the response object used for sending back the desired HTTP response
+ * @returns {Promise<void>} the promise indicating success
+ */
+const deleteItem = async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const item = await Item.findByIdAndRemove(id);
+        res.status(StatusCode.OK).json(item);
+    } catch (err) {
+        res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
+    }
+
+};
+
 module.exports = {
     addItem,
     getItems,
     updateItem,
-    getItem
+    getItem,
+    deleteItem
 };

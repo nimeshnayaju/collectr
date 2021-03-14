@@ -20,6 +20,8 @@
     "eslint": "^7.19.0",
     "eslint-config-airbnb-base": "^14.2.1",
     "eslint-plugin-import": "^2.22.1",
+    "express-validator": "^6.10.0",
+    "jsonwebtoken": "^8.5.1",
     "mocha": "^8.3.0"
   }
 }

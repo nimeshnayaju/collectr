@@ -105,5 +105,18 @@ describe('Item Test', () => {
         });
     });
 
+    /**
+     * Test DELETE /items/:id
+     */
+    describe('DELETE /items/:id', () => {
+        it('should delete item with specified id', async () => {
+            const response = await chai.request(app)
+                .delete(`/items/${item.id}`);
+
+            response.should.have.status(statusCode.OK);
+            response.body.should.be.a('object');
+        });
+    });
+
 });
 
