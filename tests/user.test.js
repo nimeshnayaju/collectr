@@ -58,13 +58,11 @@ describe('User Test', () => {
         const response = await chai
             .request(app)
             .post('/users/login')
-            .send(loginInfo)
-
-        // loginInfo.id = response.body._id;
-        loginInfo.id = response.body._id;
+            .send(loginInfo);
 
         response.should.have.status(statusCode.OK);
-        response.body.should.be.a('object');
+        response.body.should.have.property('auth').eql(true);
+        response.body.should.have.property('token');
         });
     });
 });
