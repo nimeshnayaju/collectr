@@ -1,9 +1,13 @@
 require('dotenv').config();
 
 const config = {
-    ENV: process.env.NODE_ENV || 'development',
-    PORT: process.env.PORT,
-    DB: process.env.MONGODB_URI,
+    env: process.env.NODE_ENV,
+    port: process.env.PORT,
+    db: process.env.MONGODB_URI,
+    accessTokenSecret: process.env.ACCESS_TOKEN_SECRET,
+    signOptions: {
+        expiresIn: process.env.ACCESS_TOKEN_LIFE,
+    }
 };
 
 module.exports = config;

@@ -22,6 +22,6 @@ app.use('/catalogs', catalogRoutes); // Catalog Routes
 app.use('/items', itemRoutes); // Item Routes
 app.use('/users', userRoutes); // User Routes
 
-app.listen(config.PORT, () => console.log(`Listening on port: ${config.PORT}`));
+app.listen(config.port, () => console.log(`Listening on port: ${config.port}`));
 
 module.exports = app;
