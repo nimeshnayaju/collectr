@@ -8,5 +8,6 @@ router.get('/:id', catalogController.getCatalog);
 router.post('/', catalogController.addCatalog);
 router.put('/:id', catalogController.updateCatalog);
 router.delete('/:id', catalogController.deleteCatalog);
+router.post('/search', catalogController.search);
 
 module.exports = router;

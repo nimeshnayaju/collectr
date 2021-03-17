@@ -89,10 +89,28 @@ const deleteCatalog = async (req, res) => {
     }
 };
 
+const search = async(req, res) => {
+
+    const { name, description } = req.query;
+    const queryCondition = {
+        ...(name && {name}),
+        ...(description && {description}),
+    }
+
+    try {
+        const results = await Catalog.find(queryCondition);
+        res.status(StatusCode.OK).json( results );
+    } catch (err) {
+        res.status(StatusCode.BAD_REQUEST).json({ message: err.message })
+    }
+
+}
+
 module.exports = {
     getCatalogs,
     addCatalog,
     getCatalog,
     updateCatalog,
     deleteCatalog,
+    search
 };
