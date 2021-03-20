@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "scripts": {
     "server": "node server/server.js",
+    "nodemon-server": "nodemon server/server.js",
     "eslint": "eslint ./",
     "eslint-fix": "eslint ./ --fix",
     "test": "mocha --timeout 10000 \"./tests/*.test.js\" -exit"
@@ -23,6 +24,7 @@
     "eslint": "^7.19.0",
     "eslint-config-airbnb-base": "^14.2.1",
     "eslint-plugin-import": "^2.22.1",
-    "mocha": "^8.3.0"
+    "mocha": "^8.3.0",
+    "nodemon": "^2.0.7"
   }
 }
