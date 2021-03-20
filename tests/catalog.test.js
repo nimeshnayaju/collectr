@@ -89,21 +89,6 @@ describe('Catalog Test', () => {
     });
 
     /**
-     * Test POST /catalogs/search
-     */
-    describe('POST catalogs/search', () => {
-        it('should search the catalog with the specified query parameters', async () => {
-            const response = await chai.request(app)
-                .post(`/catalogs/search?name=${catalog.name}`);
-
-            response.should.have.status(StatusCode.OK);
-            response.body.should.be.a('array');
-            response.body[0].should.have.property('name').eql(catalog.name);
-            response.body[0].should.have.property('description').eql(catalog.description);
-        });
-    });
-
-    /**
     * Test DELETE /catalogs/:id
     */
     describe('DELETE catalogs/:id', () => {
