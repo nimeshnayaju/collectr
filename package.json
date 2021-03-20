@@ -2,7 +2,7 @@
   "name": "Collectr",
   "version": "0.0.1",
   "scripts": {
-    "server": "node server/server.js",
+    "start": "node server/server.js",
     "nodemon-server": "nodemon server/server.js",
     "eslint": "eslint ./",
     "eslint-fix": "eslint ./ --fix",
