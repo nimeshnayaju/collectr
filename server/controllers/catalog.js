@@ -60,12 +60,9 @@ const getCatalog = async (req, res) => {
  */
 const updateCatalog = async (req, res) => {
     const { id } = req.params;
-    const { name, description, items } = req.body;
-
-    const catalog = new Catalog({ _id: id, name, description, items });
 
     try {
-        const updatedCatalog = await Catalog.findByIdAndUpdate(id, catalog, { new: true });
+        const updatedCatalog = await Catalog.findByIdAndUpdate(id, { $set: req.body }, { new: true }).populate('items');
         res.status(StatusCode.OK).json( updatedCatalog );
     } catch (err) {
         res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
@@ -94,5 +91,5 @@ module.exports = {
     addCatalog,
     getCatalog,
     updateCatalog,
-    deleteCatalog,
+    deleteCatalog
 };
