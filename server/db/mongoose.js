@@ -7,7 +7,7 @@ class Mongoose {
     }
 
     _connect() {
-        const activeURI = config[process.env?.ACTIVE_ENV];
+        const activeURI = config[process.env.ACTIVE_ENV];
         mongoose.connect(activeURI, { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false })
             .then(() => {
             console.log('Successfully connected to Mongoose');
