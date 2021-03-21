@@ -9,7 +9,8 @@ const StatusCode = require('../helpers/constants');
  */
 const getCatalogs = async (req, res) => {
     try {
-        const catalogs = await Catalog.find(); // Find all Catalog objects
+        const catalogs = await Catalog.find( {$or:[{isPrivate: true, userId: req.userId}, {isPrivate: false}]} );
+        // Find all Catalog objects that are public or private and belonging to user
         res.status(StatusCode.OK).json( catalogs );
     } catch (err) {
         res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
@@ -23,9 +24,10 @@ const getCatalogs = async (req, res) => {
  * @returns {Promise<void>} the promise indicating success
  */
 const addCatalog = async (req, res) => {
-    const { name, description } = req.body;
+    const { name, description, isPrivate } = req.body;
+    const userId = req.userId;
 
-    const catalog = new Catalog({ name, description });
+    const catalog = new Catalog({ name, description, isPrivate, userId});
 
     try {
         const newCatalog = await catalog.save();
@@ -46,7 +48,23 @@ const getCatalog = async (req, res) => {
 
     try {
         const catalog = await Catalog.findById(id).populate('items');
-        res.status(StatusCode.OK).json( catalog );
+
+        if(catalog.isPrivate)
+        {
+            if(req.userId.is(catalog.userId))
+            {
+                res.status(StatusCode.OK).json( catalog );
+            }
+            else
+            {
+                res.status(StatusCode.FORBIDDEN);
+            }
+        }
+        else
+        {
+            res.status(StatusCode.OK).json( catalog );
+        }
+
     } catch (err) {
         res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
     }
@@ -62,8 +80,16 @@ const updateCatalog = async (req, res) => {
     const { id } = req.params;
 
     try {
-        const updatedCatalog = await Catalog.findByIdAndUpdate(id, { $set: req.body }, { new: true }).populate('items');
-        res.status(StatusCode.OK).json( updatedCatalog );
+        const catalog = await Catalog.findById(id);
+        if(req.userId.is(catalog.userId))
+        {
+            const updatedCatalog = await Catalog.findByIdAndUpdate(id, {$set: req.body}, {new: true}).populate('items');
+            res.status(StatusCode.OK).json(updatedCatalog);
+        }
+        else
+        {
+            res.status(StatusCode.FORBIDDEN);
+        }
     } catch (err) {
         res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
     }
@@ -78,9 +104,18 @@ const updateCatalog = async (req, res) => {
 const deleteCatalog = async (req, res) => {
     const { id } = req.params;
 
+
     try {
-        const deletedCatalog = await Catalog.findByIdAndRemove(id);
-        res.status(StatusCode.OK).json( deletedCatalog );
+        const catalog = await Catalog.findById(id);
+        if(req.userId.is(catalog.userId))
+        {
+            const deletedCatalog = await Catalog.findByIdAndRemove(id);
+            res.status(StatusCode.OK).json( deletedCatalog );
+        }
+        else
+        {
+            res.status(StatusCode.FORBIDDEN);
+        }
     } catch (err) {
         res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
     }
