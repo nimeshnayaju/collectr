@@ -1,8 +1,6 @@
 var jwt = require('jsonwebtoken');
 const StatusCode = require('../helpers/constants');
-
-const accessTokenSecret = 'supersecretshh';
-// access token key should eventually be migrated to .env file and accessed through config
+const config = require('../config');
 
 /**
  * authentication middleware verifies jwt token and attaches payload to request
@@ -14,25 +12,29 @@ const accessTokenSecret = 'supersecretshh';
 
 const authenticate = async (req, res, next) => {
     const authorizationHeader = req.headers.authorization;
-
-    if (authorizationHeader)
-    {
-        const authToken = authorizationHeader.split(' ')[1];
-
-        jwt.verify(authToken, accessTokenSecret, (err, payload) => {
-            if (err)
+    try {
+            if (authorizationHeader)
             {
-                return res.sendStatus(StatusCode.FORBIDDEN);
+                const authToken = authorizationHeader.split(' ')[1];
+
+                jwt.verify(authToken, config.accessTokenSecret, (err, payload) => {
+                    if (err)
+                    {
+                        return res.sendStatus(StatusCode.FORBIDDEN);
+                    }
+                    else {
+                        req.userId = payload.id;
+                        next();
+                    }
+                });
             }
             else {
-                req.userId = payload.id;
-                next();
+                res.sendStatus(StatusCode.BAD_REQUEST)
             }
-        });
+    } catch (err) {
+        res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
     }
-    else {
-        res.sendStatus(StatusCode.BAD_REQUEST)
-    }
+
 }
 
 

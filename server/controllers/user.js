@@ -7,8 +7,7 @@ const config = require('../config');
 const { validateLogin, validateSignup } = require('../helpers/validation');
 
 const salt = 6;
-const accessTokenSecret = 'supersecretshh';
-// access token key should eventually be migrated to .env file and accessed through config
+
 
 /**
  * Logs a user in using their email and password
@@ -41,7 +40,7 @@ const login = async (req, res) => {
                 const payload = { id: user.id };
 
                 // generate access token
-                const token = await jwt.sign(payload, accessTokenSecret, config.signOptions);
+                const token = await jwt.sign(payload, config.accessTokenSecret, config.signOptions);
                 
                 res.json({ auth: true, token: token });
 
