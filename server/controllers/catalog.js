@@ -17,6 +17,24 @@ const getCatalogs = async (req, res) => {
   }
 };
 
+
+/**
+ * Lists all Catalog objects belonging to user
+ * @param req request object containing information about HTTP request
+ * @param res the response object used for sending back the desired HTTP response
+ * @returns {Promise<void>} the promise indicating success
+ */
+const getCatalogsByUser = async (req, res) => {
+    try {
+        const catalogs = await Catalog.find( {userId: req.userId} );
+        // Find all Catalog objects that belong to user
+        res.status(StatusCode.OK).json( catalogs );
+    } catch (err) {
+        res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
+    }
+};
+
+
 /**
  * Adds a new Catalog object
  * @param req request object containing information about HTTP request
@@ -36,6 +54,7 @@ const addCatalog = async (req, res) => {
         res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
     }
 };
+
 
 /**
  * Gets a specific Catalog object
@@ -95,6 +114,7 @@ const updateCatalog = async (req, res) => {
     }
 };
 
+
 /**
  * Delete a specific Catalog object
  * @param req request object containing information about HTTP request
@@ -121,8 +141,10 @@ const deleteCatalog = async (req, res) => {
     }
 };
 
+
 module.exports = {
     getCatalogs,
+    getCatalogsByUser,
     addCatalog,
     getCatalog,
     updateCatalog,
