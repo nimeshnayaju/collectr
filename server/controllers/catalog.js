@@ -2,14 +2,14 @@ const Catalog = require('../models/catalog');
 const StatusCode = require('../helpers/constants');
 
 /**
- * Lists all Catalog objects
+ * Lists all Catalog objects specific to user
  * @param req request object containing information about HTTP request
  * @param res the response object used for sending back the desired HTTP response
  * @returns {Promise<void>} the promise indicating success
  */
 const getCatalogs = async (req, res) => {
     try {
-        const catalogs = await Catalog.find( {$or:[{isPrivate: true, userId: req.userId}, {isPrivate: false}]} );
+        const catalogs = await Catalog.find( {userId: req.userId} );
         // Find all Catalog objects that are public or private and belonging to user
         res.status(StatusCode.OK).json( catalogs );
     } catch (err) {
@@ -19,14 +19,14 @@ const getCatalogs = async (req, res) => {
 
 
 /**
- * Lists all Catalog objects belonging to user
+ * Lists all Catalog objects that are public
  * @param req request object containing information about HTTP request
  * @param res the response object used for sending back the desired HTTP response
  * @returns {Promise<void>} the promise indicating success
  */
-const getCatalogsByUser = async (req, res) => {
+const getPublicCatalogs = async (req, res) => {
     try {
-        const catalogs = await Catalog.find( {userId: req.userId} );
+        const catalogs = await Catalog.find( {isPrivate: false} );
         // Find all Catalog objects that belong to user
         res.status(StatusCode.OK).json( catalogs );
     } catch (err) {
@@ -144,7 +144,7 @@ const deleteCatalog = async (req, res) => {
 
 module.exports = {
     getCatalogs,
-    getCatalogsByUser,
+    getPublicCatalogs,
     addCatalog,
     getCatalog,
     updateCatalog,
