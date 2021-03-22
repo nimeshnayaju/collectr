@@ -51,7 +51,7 @@ const getCatalog = async (req, res) => {
 
         if(catalog.isPrivate)
         {
-            if(req.userId.is(catalog.userId))
+            if(req.userId === catalog.userId)
             {
                 res.status(StatusCode.OK).json( catalog );
             }
@@ -81,7 +81,7 @@ const updateCatalog = async (req, res) => {
 
     try {
         const catalog = await Catalog.findById(id);
-        if(req.userId.is(catalog.userId))
+        if(req.userId === catalog.userId)
         {
             const updatedCatalog = await Catalog.findByIdAndUpdate(id, {$set: req.body}, {new: true}).populate('items');
             res.status(StatusCode.OK).json(updatedCatalog);
@@ -107,7 +107,7 @@ const deleteCatalog = async (req, res) => {
 
     try {
         const catalog = await Catalog.findById(id);
-        if(req.userId.is(catalog.userId))
+        if(req.userId === catalog.userId)
         {
             const deletedCatalog = await Catalog.findByIdAndRemove(id);
             res.status(StatusCode.OK).json( deletedCatalog );

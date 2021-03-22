@@ -11,27 +11,30 @@ const config = require('../config');
  */
 
 const authenticate = async (req, res, next) => {
-    const authorizationHeader = req.headers.authorization;
-    try {
-            if (authorizationHeader)
-            {
-                const authToken = authorizationHeader.split(' ')[1];
 
-                jwt.verify(authToken, config.accessTokenSecret, (err, payload) => {
-                    if (err)
-                    {
-                        return res.sendStatus(StatusCode.FORBIDDEN);
-                    }
-                    else {
-                        req.userId = payload.id;
-                        next();
-                    }
-                });
-            }
-            else {
-                res.sendStatus(StatusCode.BAD_REQUEST)
-            }
-    } catch (err) {
+    try {
+
+        const authorizationHeader = req.headers.authorization;
+        if (authorizationHeader)
+        {
+            const authToken = authorizationHeader.split(' ')[1];
+
+            jwt.verify(authToken, config.accessTokenSecret, (err, payload) => {
+                if (err)
+                {
+                    return res.sendStatus(StatusCode.FORBIDDEN).json({ message: "verification error"});
+                }
+                else {
+                    req.userId = payload.id;
+                    next();
+                }
+            });
+        }
+        else {
+            res.sendStatus(StatusCode.BAD_REQUEST)
+        }
+    }
+    catch (err) {
         res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
     }
 
