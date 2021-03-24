@@ -3,6 +3,7 @@ const User = require('../models/user');
 const StatusCode = require('../helpers/constants');
 const express = require("express");
 const router = express.Router();
+const sendEmail = require("../utils/email/sendEmail");
 const jwt = require("jsonwebtoken");
 /**
  * Logs a user in using their email and password
@@ -26,7 +27,7 @@ const login = async (req, res) => {
                 res.status(StatusCode.BAD_REQUEST).json({message: "Incorrect Password"});
             else {
                 const payload = {user: {id: user.id}};
-                jwt.sign(payload, "key", {expiresIn: 3600},
+                jwt.sign(payload, "secret key", {expiresIn: 3600},
                     (err, token) => {
                         if (err) throw err;
                         res.status(StatusCode.OK).json({token});
@@ -69,7 +70,6 @@ const signup = async (req, res) => {
             res.status(StatusCode.CREATED).json(newUser);
         }
   } catch (err) {
-
     res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
 
   }
@@ -85,4 +85,6 @@ function validateEmail(email)
 module.exports = {
   login,
   signup,
+    changePassword,
+    changePasswordRequest,
 };
