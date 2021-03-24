@@ -5,7 +5,7 @@ const userController = require('../controllers/user');
 
 router.post('/login',  userController.login);
 router.post('/signup', userController.signup);
-router.post('/changePasswordRequest', userController.changePasswordRequest);
-router.post('/changePassword', userController.changePassword);
+router.post('/passwordResetReq', userController.passwordResetReq);
+router.post('/passwordReset', userController.passwordReset);
 
 module.exports = router;
