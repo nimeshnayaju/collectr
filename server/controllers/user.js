@@ -1,10 +1,13 @@
 const bcrypt = require('bcrypt');
+const jwt = require("jsonwebtoken");
+
 const User = require('../models/user');
 const StatusCode = require('../helpers/constants');
-const express = require("express");
-const router = express.Router();
-const sendEmail = require("../utils/email/sendEmail");
-const jwt = require("jsonwebtoken");
+const config = require('../config');
+const { validateLogin, validateSignup } = require('../helpers/validation');
+
+const salt = 6;
+
 /**
  * Logs a user in using their email and password
  * @param req request object containing information about HTTP request
@@ -13,31 +16,40 @@ const jwt = require("jsonwebtoken");
  */
 const login = async (req, res) => {
     try {
-        const {email, password} = req.body;
-        let user = await User.findOne({email});
-        if (!user)
-            res.status(StatusCode.BAD_REQUEST).json({message: "User not found"});
-        if (!validateEmail(req.body.email))
-            res.status(StatusCode.BAD_REQUEST).json({ message: 'Invalid email format' });
-        if (req.body.password.length < 6)
-            res.status(StatusCode.BAD_REQUEST).json({message: "Password must be more than 6 characters"});
-        else {
-            const isPassword = await bcrypt.compare(password, user.password);
-            if (!isPassword)
-                res.status(StatusCode.BAD_REQUEST).json({message: "Incorrect Password"});
-            else {
-                const payload = {user: {id: user.id}};
-                jwt.sign(payload, "secret key", {expiresIn: 3600},
-                    (err, token) => {
-                        if (err) throw err;
-                        res.status(StatusCode.OK).json({token});
-                    }
-                );
-            }
+        // form validation
+        const { errors, isValid } = validateLogin(req.body);
+    
+        if (!isValid) {
+            return res.status(StatusCode.BAD_REQUEST).json( errors );
         }
-    }
-        catch (err) {
-        res.status(StatusCode.BAD_REQUEST).json({message: "Error"});
+
+        // read email and password from request body
+        const {email, password} = req.body;
+
+        // check if the user with the specified email exists in the database
+        let user = await User.findOne({ email });
+
+        if (user) {
+            const isPassword = await bcrypt.compare(password, user.password);
+
+            if (!isPassword)
+                res.status(StatusCode.BAD_REQUEST).json({ auth: false, token: null });
+            else {
+                // payload for JWT
+                const payload = { email: email };
+
+                // generate access token
+                const token = await jwt.sign(payload, "key", config.signOptions);
+                
+                res.json({ auth: true, token: token });
+
+            }
+
+        } else {
+            res.status(StatusCode.BAD_REQUEST).json({ message: "User not found" });
+        }
+    } catch (err) {
+        res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
     }
 }
 
@@ -48,43 +60,41 @@ const login = async (req, res) => {
  * @returns {Promise<void>} the promise indicating success
  */
 const signup = async (req, res) => {
-  try {
-    // find if the user already exist
-    let user = await User.findOne({ email: req.body.email });
-    if (user)
-        res.status(StatusCode.BAD_REQUEST).json({ message: 'User already found!' });
-    if (!validateEmail(req.body.email))
-        res.status(StatusCode.BAD_REQUEST).json({message: 'Invalid email format'});
-    if (req.body.password.length < 6)
-            res.status(StatusCode.BAD_REQUEST).json({message: "Password must be more than 6 characters"});
-    else {
+    try {
+        // form validation
+        const { errors, isValid } = validateSignup(req.body);
 
+        if (!isValid) {
+            return res.status(StatusCode.BAD_REQUEST).json(errors);
+        }
+
+        // find if the user with the specified email already exist
+        let user = await User.findOne({ email: req.body.email });
+
+        if (user) {
+            res.status(StatusCode.BAD_REQUEST).json({ message: 'User already found!' });
+
+        } else {
             const {firstName, lastName, email, password} = req.body;
             user = new User({firstName, lastName, email, password});
 
             // encrypt the raw password
-            const encrypt = await bcrypt.genSalt(5);
+            const encrypt = await bcrypt.genSalt(salt);
             user.password = await bcrypt.hash(user.password, encrypt);
 
             const newUser = await user.save();
-            res.status(StatusCode.CREATED).json(newUser);
+            res.status(StatusCode.CREATED).json( newUser );
         }
-  } catch (err) {
-    res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
+    } catch (err) {
 
-  }
+        res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
+
+    }
 };
-
-/* function that checks the format of a given email address */
-function validateEmail(email)
-{
-    var re = /\S+@\S+\.\S+/;
-    return re.test(email);
-}
 
 module.exports = {
-  login,
-  signup,
-    changePassword,
-    changePasswordRequest,
+    login,
+    signup,
 };
+
+

@@ -44,19 +44,16 @@ const getItems = async (req, res) => {
 };
 
 /**
- * Updates item by id
+ * Updates a pre-existing Item object
  * @param req request object containing information about HTTP request
  * @param res the response object used for sending back the desired HTTP response
  * @returns {Promise<void>} the promise indicating success
  */
 const updateItem = async (req, res) => {
     const { id } = req.params;
-    const { name, date, manufacturer, catalog } = req.body;
-
-    const item = new Item({ _id: id, name, date, manufacturer, catalog });
 
     try {
-        const updatedItem = await Item.findByIdAndUpdate(id, item, { new: true });
+        const updatedItem = await Item.findByIdAndUpdate(id, { $set: req.body }, { new: true });
         res.status(StatusCode.OK).json( updatedItem );
     } catch (err) {
         res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
