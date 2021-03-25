@@ -124,8 +124,11 @@ const passwordResetReq = async (req, res) => {
             },
             "./resetPassword.handlebars"
         );
-        res.status(StatusCode.OK).json({ message: 'Email sent' });
+        console.log(user._id)
+        console.log(resetToken);
 
+
+        res.status(StatusCode.OK).json({ message: 'Email sent' });
     } catch(err){
             res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
         }
@@ -170,10 +173,11 @@ const passwordReset = async (req, res) => {
             {
                 firstName: user.firstName,
             },
-            "./template/resetPassword.handlebars"
+            "./resetPassword.handlebars"
         );
 
         await passwordResetToken.deleteOne();
+        res.status(StatusCode.OK).json({ message: 'Password successfully changed' });
 
     }catch(err){
         res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
