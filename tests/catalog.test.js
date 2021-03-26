@@ -3,15 +3,46 @@ const chaiHttp = require('chai-http');
 const app = require('../server/server');
 const StatusCode = require('../server/helpers/constants');
 const Catalog = require('../server/models/catalog');
+const User = require('../server/models/user')
+const Auth = require('../server/middleware/auth')
+const config = require('../server/config');
+const jwt = require("jsonwebtoken");
+const chaieach = require('chai-each')
 
 const should = chai.should();
 
 chai.use(chaiHttp);
+chai.use(chaieach)
 
-const catalog = {
+const catalog1 = {
     name: 'Vinyl Records',
     description: 'Collection of Vinyl records from the 1980s',
+    isPrivate: true
 };
+
+const catalog2 = {
+    name: 'Stamps',
+    description: 'Sticky paper make letter go brr',
+    isPrivate: false
+};
+
+const numCats = 2;
+
+const user = new User( {
+    firstName: 'Test',
+    lastName: 'Testerson',
+    email: 'test@test.com',
+    password: 'testlife'
+});
+
+const loginInfo = {
+    email: 'test@test.com',
+    password: 'testlife'
+};
+
+
+const token = jwt.sign({ id: user.id }, config.accessTokenSecret, config.signOptions);
+
 
 describe('Catalog Test', () => {
     
@@ -28,14 +59,22 @@ describe('Catalog Test', () => {
             const response = await chai
                 .request(app)
                 .post('/catalogs')
-                .send(catalog);
+                .set({ Authorization: `Bearer ${token}` })
+                .send(catalog1);
 
-            catalog.id = response.body._id;
+            catalog1.id = response.body._id;
 
             response.should.have.status(StatusCode.CREATED);
             response.body.should.be.a('object');
             response.body.should.have.property('name');
             response.body.should.have.property('description');
+            response.body.should.have.property('userId').eq(user.id)
+
+            const response2 = await chai
+                .request(app)
+                .post('/catalogs')
+                .set({ Authorization: `Bearer ${token}` })
+                .send(catalog2);
         });
     });
 
@@ -45,11 +84,30 @@ describe('Catalog Test', () => {
     describe('GET /catalogs', () => {
         it('should list all catalogs', async () => {
             const response = await chai.request(app)
-            .get('/catalogs');
+            .get('/catalogs')
+            .set({ Authorization: `Bearer ${token}` });
+
+            response.should.have.status(StatusCode.OK);
+            response.body.should.be.a('array');
+            response.body.length.should.be.eql(numCats);
+            response.body.should.each.have.property('userId').eql(user.id);
+        });
+    });
+
+
+    /**
+     * Test GET /catalogs/public
+     */
+    describe('GET /catalogs/public', () => {
+        it('should list all public catalogs', async () => {
+            const response = await chai.request(app)
+                .get('/catalogs/public')
+                .set({ Authorization: `Bearer ${token}` });
 
             response.should.have.status(StatusCode.OK);
             response.body.should.be.a('array');
             response.body.length.should.be.eql(1);
+            response.body.should.each.have.property('isPrivate').eql(false);
         });
     });
 
@@ -59,14 +117,15 @@ describe('Catalog Test', () => {
     describe('GET catalogs/:id', () => {
         it('should return the catalog with the specified id', async () => {
             const response = await chai.request(app)
-                .get(`/catalogs/${catalog.id}`);
+                .get(`/catalogs/${catalog1.id}`)
+                .set({ Authorization: `Bearer ${token}` });
 
             response.should.have.status(StatusCode.OK);
             response.body.should.be.a('object');
             response.body.should.have.property('name');
             response.body.should.have.property('description');
             response.body.should.have.property('items');
-            response.body.should.have.property('_id').eql(catalog.id);
+            response.body.should.have.property('_id').eql(catalog1.id);
         });
     });
 
@@ -78,10 +137,11 @@ describe('Catalog Test', () => {
             const newCollection = { description: 'Collection of Vinyl records from the 1970s' };
 
             const response = await chai.request(app)
-                .put(`/catalogs/${catalog.id}`)
+                .put(`/catalogs/${catalog1.id}`)
+                .set({ Authorization: `Bearer ${token}` })
                 .send(newCollection);
 
-            catalog.description = newCollection.description; // For search unit test
+            catalog1.description = newCollection.description; // For search unit test
             response.should.have.status(StatusCode.OK);
             response.body.should.be.a('object');
             response.body.should.have.property('description').eql(newCollection.description);
@@ -94,7 +154,8 @@ describe('Catalog Test', () => {
     describe('DELETE catalogs/:id', () => {
         it('should delete the catalog with the specified id', async () => {
             const response = await chai.request(app)
-                .delete(`/catalogs/${catalog.id}`);
+                .delete(`/catalogs/${catalog1.id}`)
+                .set({ Authorization: `Bearer ${token}` });
 
             response.should.have.status(StatusCode.OK);
             response.body.should.be.a('object');

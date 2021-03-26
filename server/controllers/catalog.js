@@ -27,7 +27,7 @@ const getCatalogs = async (req, res) => {
 const getPublicCatalogs = async (req, res) => {
     try {
         const catalogs = await Catalog.find( {isPrivate: false} );
-        // Find all Catalog objects that belong to user
+        // Find all Catalog objects set to public
         res.status(StatusCode.OK).json( catalogs );
     } catch (err) {
         res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
