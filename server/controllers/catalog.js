@@ -10,7 +10,7 @@ const StatusCode = require('../helpers/constants');
 const getCatalogs = async (req, res) => {
     try {
         const catalogs = await Catalog.find( {userId: req.userId} );
-        // Find all Catalog objects that are public or private and belonging to user
+        // Find all Catalog objects that belong to user
         res.status(StatusCode.OK).json( catalogs );
     } catch (err) {
         res.status(StatusCode.BAD_REQUEST).json({ message: err.message });

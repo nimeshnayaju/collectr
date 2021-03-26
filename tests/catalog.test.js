@@ -17,16 +17,9 @@ chai.use(chaieach)
 const catalog1 = {
     name: 'Vinyl Records',
     description: 'Collection of Vinyl records from the 1980s',
-    isPrivate: true
-};
-
-const catalog2 = {
-    name: 'Stamps',
-    description: 'Sticky paper make letter go brr',
     isPrivate: false
 };
 
-const numCats = 2;
 
 const user = new User( {
     firstName: 'Test',
@@ -35,10 +28,6 @@ const user = new User( {
     password: 'testlife'
 });
 
-const loginInfo = {
-    email: 'test@test.com',
-    password: 'testlife'
-};
 
 
 const token = jwt.sign({ id: user.id }, config.accessTokenSecret, config.signOptions);
@@ -50,6 +39,7 @@ describe('Catalog Test', () => {
         // Clear the collection before the test
         await Catalog.deleteMany({});
     });
+
 
   /**
    * Test POST /catalogs
@@ -70,13 +60,9 @@ describe('Catalog Test', () => {
             response.body.should.have.property('description');
             response.body.should.have.property('userId').eq(user.id)
 
-            const response2 = await chai
-                .request(app)
-                .post('/catalogs')
-                .set({ Authorization: `Bearer ${token}` })
-                .send(catalog2);
         });
     });
+
 
   /**
    * Test GET /catalogs
@@ -84,12 +70,12 @@ describe('Catalog Test', () => {
     describe('GET /catalogs', () => {
         it('should list all catalogs', async () => {
             const response = await chai.request(app)
-            .get('/catalogs')
-            .set({ Authorization: `Bearer ${token}` });
+                .get('/catalogs')
+                .set({ Authorization: `Bearer ${token}` });
 
             response.should.have.status(StatusCode.OK);
             response.body.should.be.a('array');
-            response.body.length.should.be.eql(numCats);
+            response.body.length.should.be.eql(1);
             response.body.should.each.have.property('userId').eql(user.id);
         });
     });
@@ -111,6 +97,7 @@ describe('Catalog Test', () => {
         });
     });
 
+
     /**
     * Test GET /catalogs/:id
     */
@@ -128,6 +115,7 @@ describe('Catalog Test', () => {
             response.body.should.have.property('_id').eql(catalog1.id);
         });
     });
+
 
     /**
     * Test PUT /catalogs/:id
@@ -147,6 +135,7 @@ describe('Catalog Test', () => {
             response.body.should.have.property('description').eql(newCollection.description);
         });
     });
+
 
     /**
     * Test DELETE /catalogs/:id
