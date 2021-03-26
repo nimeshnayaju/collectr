@@ -128,7 +128,7 @@ const passwordResetReq = async (req, res) => {
         console.log(resetToken);
 
 
-        res.status(StatusCode.OK).json({ message: 'Email sent' });
+        res.status(StatusCode.OK).json({ message: 'Email sent', resetToken });
     } catch(err){
             res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
         }
