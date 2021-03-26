@@ -173,7 +173,7 @@ const passwordReset = async (req, res) => {
             {
                 firstName: user.firstName,
             },
-            "./resetPassword.handlebars"
+            "./passwordSuccess.handlebars"
         );
 
         await passwordResetToken.deleteOne();

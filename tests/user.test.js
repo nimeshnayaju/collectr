@@ -84,6 +84,7 @@ describe('User Test', () => {
           .send(resetPasswordInfo)
 
       response.should.have.status(statusCode.OK);
+      response.body.should.have.a.property('resetToken')
     });
   });
 
