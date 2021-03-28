@@ -9,7 +9,7 @@ const StatusCode = require('../helpers/constants');
  */
 const getCatalogs = async (req, res) => {
     try {
-        const catalogs = await Catalog.find( {userId: req.userId} );
+        const catalogs = await Catalog.find( {user: req.user} );
         // Find all Catalog objects that belong to user
         res.status(StatusCode.OK).json( catalogs );
     } catch (err) {
@@ -43,9 +43,9 @@ const getPublicCatalogs = async (req, res) => {
  */
 const addCatalog = async (req, res) => {
     const { name, description, isPrivate } = req.body;
-    const userId = req.userId;
+    const user = req.user;
 
-    const catalog = new Catalog({ name, description, isPrivate, userId});
+    const catalog = new Catalog({ name, description, isPrivate, user});
 
     try {
         const newCatalog = await catalog.save();
@@ -70,7 +70,7 @@ const getCatalog = async (req, res) => {
 
         if(catalog.isPrivate)
         {
-            if(req.userId === catalog.userId)
+            if(req.user == catalog.user)
             {
                 res.status(StatusCode.OK).json( catalog );
             }
@@ -100,7 +100,7 @@ const updateCatalog = async (req, res) => {
 
     try {
         const catalog = await Catalog.findById(id);
-        if(req.userId === catalog.userId)
+        if(req.user == catalog.user)
         {
             const updatedCatalog = await Catalog.findByIdAndUpdate(id, {$set: req.body}, {new: true}).populate('items');
             res.status(StatusCode.OK).json(updatedCatalog);
@@ -127,7 +127,7 @@ const deleteCatalog = async (req, res) => {
 
     try {
         const catalog = await Catalog.findById(id);
-        if(req.userId === catalog.userId)
+        if(req.user == catalog.user)
         {
             const deletedCatalog = await Catalog.findByIdAndRemove(id);
             res.status(StatusCode.OK).json( deletedCatalog );

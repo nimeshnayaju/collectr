@@ -2,13 +2,13 @@ const express = require('express');
 
 const router = express.Router();
 const catalogController = require('../controllers/catalog');
-const auth = require('../middleware/auth');
+const { authenticate } = require('../middleware/auth');
 
-router.get('/', auth.authenticate, catalogController.getCatalogs);
-router.get('/:id', auth.authenticate, catalogController.getCatalog);
-router.get('/public', auth.authenticate, catalogController.getPublicCatalogs);
-router.post('/', auth.authenticate, catalogController.addCatalog);
-router.put('/:id', auth.authenticate, catalogController.updateCatalog);
-router.delete('/:id', auth.authenticate, catalogController.deleteCatalog);
+router.get('/', authenticate, catalogController.getCatalogs);
+router.get('/public', authenticate, catalogController.getPublicCatalogs);
+router.get('/:id', authenticate, catalogController.getCatalog);
+router.post('/', authenticate, catalogController.addCatalog);
+router.put('/:id', authenticate, catalogController.updateCatalog);
+router.delete('/:id', authenticate, catalogController.deleteCatalog);
 
 module.exports = router;

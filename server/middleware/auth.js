@@ -1,6 +1,6 @@
 var jwt = require('jsonwebtoken');
 const StatusCode = require('../helpers/constants');
-const config = require('../config');
+const Config = require('../config');
 
 /**
  * authentication middleware verifies jwt token and attaches payload to request
@@ -18,20 +18,16 @@ const authenticate = async (req, res, next) => {
         if (authorizationHeader)
         {
             const authToken = authorizationHeader.split(' ')[1];
-
-            jwt.verify(authToken, config.accessTokenSecret, (err, payload) => {
-                if (err)
-                {
-                    return res.sendStatus(StatusCode.FORBIDDEN).json({ message: "verification error"});
-                }
-                else {
-                    req.userId = payload.id;
-                    next();
-                }
-            });
+            try {
+                const payload = jwt.verify(authToken, Config.accessTokenSecret);
+                req.user = payload.id;
+                next();
+            } catch (err) {
+                return res.status(StatusCode.FORBIDDEN).json({ message: err.message });
+            }
         }
         else {
-            res.sendStatus(StatusCode.BAD_REQUEST)
+            res.status(StatusCode.BAD_REQUEST);
         }
     }
     catch (err) {

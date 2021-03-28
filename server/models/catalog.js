@@ -5,7 +5,7 @@ const CatalogSchema = new mongoose.Schema({
     description: { type: String, required: true },
     items: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Item' }],
     isPrivate: {type: Boolean, required: true},
-    userId: { type: String, required: true}
+    user: { type: mongoose.Schema.Types.ObjectId, ref:'User', required: true}
 });
 
 module.exports = mongoose.model('Catalog', CatalogSchema);
