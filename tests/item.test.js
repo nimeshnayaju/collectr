@@ -3,7 +3,10 @@ const chaiHttp = require('chai-http');
 const app = require('../server/server');
 const statusCode = require('../server/helpers/constants');
 const Item = require('../server/models/item');
+const config = require('../server/config');
+const User = require('../server/models/user')
 
+const jwt = require("jsonwebtoken");
 const should = chai.should();
 
 chai.use(chaiHttp);
@@ -11,21 +14,39 @@ chai.use(chaiHttp);
 const catalog = {
     name: 'Vintage Guitar',
     description: 'Collection of sought after guitars from famous musicians',
+    isPrivate: true
 };
+
 const item = {
     name: '1912 Gibson Mandolin-Guitar Mfg. Co. Style U',
     date: '1912',
     manufacturer: 'Gibson',
 };
 
+const user = new User( {
+    firstName: 'Test',
+    lastName: 'Testerson',
+    email: 'test@test.com',
+    password: 'testlife'
+});
+
+
+
+let token;
+
 describe('Item Test', () => {
     before(async () => {
         // Clear the items before the test
         await Item.deleteMany({});
+
+        // Generate authorization token
+        token = jwt.sign({ id: user.id }, config.accessTokenSecret, config.signOptions);
+
         // Add a mock Catalog object
         const response = await chai
             .request(app)
             .post('/catalogs')
+            .set({ Authorization: `Bearer ${token}` })
             .send(catalog);
         catalog.id = response.body._id;
         item.catalog = response.body._id;

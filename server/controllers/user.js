@@ -8,6 +8,7 @@ const { validateLogin, validateSignup } = require('../helpers/validation');
 
 const salt = 6;
 
+
 /**
  * Logs a user in using their email and password
  * @param req request object containing information about HTTP request
@@ -36,10 +37,10 @@ const login = async (req, res) => {
                 res.status(StatusCode.BAD_REQUEST).json({ auth: false, token: null });
             else {
                 // payload for JWT
-                const payload = { email: email };
+                const payload = { id: user.id };
 
                 // generate access token
-                const token = await jwt.sign(payload, "key", config.signOptions);
+                const token = await jwt.sign(payload, config.accessTokenSecret, config.signOptions);
                 
                 res.json({ auth: true, token: token });
 
