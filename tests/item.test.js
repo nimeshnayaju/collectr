@@ -5,11 +5,12 @@ const statusCode = require('../server/helpers/constants');
 const Item = require('../server/models/item');
 const config = require('../server/config');
 const User = require('../server/models/user')
-
+const chaieach = require('chai-each')
 const jwt = require("jsonwebtoken");
 const should = chai.should();
 
 chai.use(chaiHttp);
+chai.use(chaieach)
 
 const catalog = {
     name: 'Vintage Guitar',
@@ -21,6 +22,7 @@ const item = {
     name: '1912 Gibson Mandolin-Guitar Mfg. Co. Style U',
     date: '1912',
     manufacturer: 'Gibson',
+    isPrivate: false
 };
 
 const user = new User( {
@@ -61,6 +63,7 @@ describe('Item Test', () => {
             const response = await chai
                 .request(app)
                 .post('/items')
+                .set({ Authorization: `Bearer ${token}` })
                 .send(item);
 
             item.id = response.body._id;
@@ -70,6 +73,7 @@ describe('Item Test', () => {
             response.body.should.have.property('name');
             response.body.should.have.property('manufacturer');
             response.body.should.have.property('date');
+            response.body.should.have.property('user').eq(user.id)
         });
     });
 
@@ -79,11 +83,29 @@ describe('Item Test', () => {
     describe('GET /items/', () => {
         it('should list all items', async () => {
             const response = await chai.request(app)
-                .get('/items');
+                .get('/items')
+                .set({ Authorization: `Bearer ${token}` });
 
             response.should.have.status(statusCode.OK);
             response.body.should.be.a('array');
             response.body.length.should.be.eql(1);
+            response.body.should.each.have.property('user').eql(user.id);
+        });
+    });
+
+    /**
+     * Test GET /items/public
+     */
+    describe('GET /items/public', () => {
+        it('should list all items', async () => {
+            const response = await chai.request(app)
+                .get('/items/public')
+                .set({ Authorization: `Bearer ${token}` });
+
+            response.should.have.status(statusCode.OK);
+            response.body.should.be.a('array');
+            response.body.length.should.be.eql(1);
+            response.body.should.each.have.property('isPrivate').eql(false);
         });
     });
 
@@ -93,7 +115,8 @@ describe('Item Test', () => {
     describe('GET /items/:id', () => {
         it('should get item with specified id', async () => {
             const response = await chai.request(app)
-                .get(`/items/${item.id}`);
+                .get(`/items/${item.id}`)
+                .set({ Authorization: `Bearer ${token}` });;
 
             response.should.have.status(statusCode.OK);
             response.body.should.be.a('object');
@@ -117,6 +140,7 @@ describe('Item Test', () => {
 
             const response = await chai.request(app)
                 .put(`/items/${item.id}`)
+                .set({ Authorization: `Bearer ${token}` })
                 .send(newItem);
 
             response.should.have.status(statusCode.OK);
@@ -132,7 +156,8 @@ describe('Item Test', () => {
     describe('DELETE /items/:id', () => {
         it('should delete item with specified id', async () => {
             const response = await chai.request(app)
-                .delete(`/items/${item.id}`);
+                .delete(`/items/${item.id}`)
+                .set({ Authorization: `Bearer ${token}` });
 
             response.should.have.status(statusCode.OK);
             response.body.should.be.a('object');
