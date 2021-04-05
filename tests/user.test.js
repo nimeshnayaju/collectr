@@ -20,10 +20,6 @@ const loginInfo = {
   password: 'ilovepiano',
 };
 
-const resetPasswordInfo = {
-  email: 'lbee@music.com',
-};
-
 describe('User Test', () => {
 
   before(async () => {
@@ -71,35 +67,4 @@ describe('User Test', () => {
         response.body.should.be.a('object');
         });
     });
-
-  /**
-   * Test POST /passwordResetReq
-   */
-  describe('POST /passwordResetReq', () => {
-    it('should send the user an email to reset their password', async () => {
-      // mock user object
-      const response = await chai
-          .request(app)
-          .post('/users/passwordResetReq')
-          .send(resetPasswordInfo)
-
-      response.should.have.status(statusCode.OK);
-      response.body.should.have.a.property('resetToken')
-    });
-  });
-
-  /**
-   * Test POST /passwordReset
-   */
-  // describe('POST /passwordReset', () => {
-  //   it('should reset the user\'s password', async () => {
-  //     // mock user object
-  //     const response = await chai
-  //         .request(app)
-  //         .post('/users/passwordReset')
-  //         .send(resetPasswordInfo)
-  //
-  //     response.should.have.status(statusCode.OK);
-  //   });
-  // });
 });

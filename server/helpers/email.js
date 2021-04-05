@@ -5,7 +5,7 @@ const path = require("path");
 const StatusCode = require('./constants');
 const Config = require('../config');
 
-const sendEmail = async (email, subject, body, res) => {
+const sendEmail = async (email, subject, body, successMessage, res) => {
     const transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
@@ -23,9 +23,8 @@ const sendEmail = async (email, subject, body, res) => {
 
     try {
         await transporter.sendMail(mailOptions);
-        res.status(StatusCode.OK).json({ message: "password resset email sent" });
     } catch (err) {
-        console.log(err);
+        throw err;
     }
 }
 
