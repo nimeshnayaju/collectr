@@ -15,6 +15,8 @@ const newUser = {
   password: 'ilovepiano',
 };
 
+let verifyToken = null;
+
 const loginInfo = {
   email: 'lbee@music.com',
   password: 'ilovepiano',
@@ -32,27 +34,45 @@ describe('User Test', () => {
   });
 
   /**
-  * Test POST /signup
+  * Test POST /signupReq
   */
-  describe('POST /signup', () => {
+  describe('POST /signupReq', () => {
     it('should register a new user', async () => {
       // Add the mock user object
       const response = await chai
         .request(app)
-        .post('/users/signup')
+        .post('/users/signupReq')
         .send(newUser);
 
       newUser.id = response.body._id;
 
-      response.should.have.status(statusCode.CREATED);
-      response.body.should.be.a('object');
-      response.body.should.have.property('firstName');
-      response.body.should.have.property('lastName');
-      response.body.should.have.property('email');
-      response.body.should.have.property('password');
+      response.should.have.status(statusCode.OK);
+      response.body.should.have.a.property('verifyToken')
+      verifyToken = response.body.confirmationToken;
     });
   });
 
+  /**
+   * Test POST /signup
+   */
+  describe('POST /signup', () => {
+    it('should signup a user after they verify their email', async () => {
+      // Add the mock user object
+      const response = await chai
+          .request(app)
+          .post('/users/signup')
+          .send(verifyToken);
+
+      newUser.id = response.body._id;
+      response.should.be.a('object');
+      response.body.should.have.property('email');
+      // response.should.have.property('firstName');
+      // response.body.should.have.property('lastName');
+      // response.body.should.have.property('email');
+      // response.body.should.have.property('password');
+      response.should.have.status(statusCode.CREATED);
+    });
+  });
     /**
     * Test POST /login
     */
@@ -84,22 +104,8 @@ describe('User Test', () => {
           .send(resetPasswordInfo)
 
       response.should.have.status(statusCode.OK);
-      response.body.should.have.a.property('resetToken')
+      response.body.should.have.property('resetToken')
     });
   });
 
-  /**
-   * Test POST /passwordReset
-   */
-  // describe('POST /passwordReset', () => {
-  //   it('should reset the user\'s password', async () => {
-  //     // mock user object
-  //     const response = await chai
-  //         .request(app)
-  //         .post('/users/passwordReset')
-  //         .send(resetPasswordInfo)
-  //
-  //     response.should.have.status(statusCode.OK);
-  //   });
-  // });
 });
