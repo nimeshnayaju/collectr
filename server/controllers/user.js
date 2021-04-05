@@ -1,11 +1,15 @@
 const bcrypt = require('bcrypt');
+const crypto = require('crypto');
 const jwt = require("jsonwebtoken");
+
+
 const Token = require("../models/token.js");
 const User = require('../models/user');
 const StatusCode = require('../helpers/constants');
 const config = require('../config');
-const sendEmail = require('../helpers/sendEmail');
+const sendEmail = require('../helpers/email');
 const { validateLogin, validateSignup } = require('../helpers/validation');
+
 const salt = 6;
 
 /**
@@ -100,11 +104,31 @@ const signup = async (req, res) => {
  */
 const passwordResetReq = async (req, res) => {
     try{
-        const crypto = require('crypto');
         const email = req.body.email;
-        const user = await User.findOne({ email });
-        if (!user)
-            res.status(StatusCode.BAD_REQUEST).json({ message: 'Email does not exist' });
+
+        try {
+
+            const user = await User.findOne({ email });
+            if (!user) {
+                return res.status(StatusCode.BAD_REQUEST).json({ message: 'email does not exist' });
+            }
+
+            let resetToken = crypto.randomBytes(32).toString("hex");
+            
+
+            let body =  'You are receiving this because we received a password reset request from your account.\n\n'
+                        + 'Please click on the following link, or paste the link into your browser within an hour of receiving it to reset your password:\n\n'
+                        + `${config.clientURL}/reset/?token=${resetToken}\n\n`
+                        + `If you did not request this, please ignore this email and your password will remain unchanged`;
+
+            let subject = 'Password Reset Request';
+
+            sendEmail(user.email, subject, body);
+                
+        } catch (err) {
+            console.log(err);
+        }
+
         let token = await Token.findOne({ userId: user._id });
         if (token) await Token.deleteOne();
 
@@ -124,10 +148,6 @@ const passwordResetReq = async (req, res) => {
             },
             "./resetPassword.handlebars"
         );
-        console.log(user._id)
-        console.log(resetToken);
-
-
         res.status(StatusCode.OK).json({ message: 'Email sent', resetToken });
     } catch(err){
             res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
