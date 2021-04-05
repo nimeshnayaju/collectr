@@ -16,6 +16,7 @@ const newUser = {
 };
 
 let verifyToken = null;
+let passwordToken = null;
 
 const loginInfo = {
   email: 'lbee@music.com',
@@ -64,12 +65,7 @@ describe('User Test', () => {
           .send(verifyToken);
 
       newUser.id = response.body._id;
-      response.should.be.a('object');
-      response.body.should.have.property('email');
-      // response.should.have.property('firstName');
-      // response.body.should.have.property('lastName');
-      // response.body.should.have.property('email');
-      // response.body.should.have.property('password');
+      response.body.should.be.a('object');
       response.should.have.status(statusCode.CREATED);
     });
   });
@@ -105,6 +101,7 @@ describe('User Test', () => {
 
       response.should.have.status(statusCode.OK);
       response.body.should.have.property('resetToken')
+      passwordToken = response.body.resetToken;
     });
   });
 

@@ -122,23 +122,18 @@ const signupReq = async (req, res) => {
  */
 const signup = async (req, res) => {
     try{
-        User.findOne({
+        let user = await User.findOne({
             confirmationCode: req.params.confirmationCode,
         })
-            .then((user) => {
-                // console.log(user);
-                if (!user) {
-                    res.status(StatusCode.BAD_REQUEST).json({message: "User Not found." });
-                }
-                user.status = "Active";
-                user.save((err) => {
-                    if (err) {
-                        res.status(StatusCode.INTERNAL_SERVER_ERROR).send({message: err.message});
-                        return;
-                    }
-                    res.status(StatusCode.CREATED).json({user});
-                });
-            })
+        if (!user) {
+            res.status(StatusCode.BAD_REQUEST).json({message: "User Not found." });
+        }
+        user.status = "Active";
+        const newUser = await user.save();
+        res.status(StatusCode.CREATED).json({newUser});
+        // console.log(newUser);
+        // });
+        //     })
     } catch (err) {
         res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
     }};
