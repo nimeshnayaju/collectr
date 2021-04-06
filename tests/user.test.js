@@ -3,6 +3,8 @@ const chaiHttp = require('chai-http');
 const app = require('../server/server');
 const statusCode = require('../server/helpers/constants');
 const User = require('../server/models/user');
+const accessTokenSecret = 'supersecretshh';
+
 
 const should = chai.should();
 
@@ -67,4 +69,16 @@ describe('User Test', () => {
         response.body.should.be.a('object');
         });
     });
+
+  /**
+   *  Test auth middleware
+   */
+  describe('auth test', () => {
+    it('should verify jwt payload', async () => {
+
+
+
+
+    })
+  })
 });
