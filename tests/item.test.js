@@ -116,7 +116,7 @@ describe('Item Test', () => {
         it('should get item with specified id', async () => {
             const response = await chai.request(app)
                 .get(`/items/${item.id}`)
-                .set({ Authorization: `Bearer ${token}` });;
+                .set({ Authorization: `Bearer ${token}` });
 
             response.should.have.status(statusCode.OK);
             response.body.should.be.a('object');

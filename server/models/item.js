@@ -5,7 +5,7 @@ const ItemSchema = new mongoose.Schema({
     date: { type: Date },
     manufacturer: { type: String },
     isPrivate: { type: Boolean, required: true },
-    user: { type: mongoose.schema.Types.ObjectId, ref:'User', required: true }
+    user: { type: mongoose.Schema.Types.ObjectId, ref:'User', required: true }
 });
 
 module.exports = mongoose.model('Item', ItemSchema);

@@ -71,6 +71,7 @@ const updateItem = async (req, res) => {
 
 
     try {
+        const item = await Item.findById(id);
         if(req.user == item.user)
         {
             const updatedItem = await Item.findByIdAndUpdate(id, { $set: req.body }, { new: true });
@@ -94,11 +95,11 @@ const updateItem = async (req, res) => {
  */
  const getItem = async (req, res) => {
     const { id } = req.params;
-  
+
     try {
+        const item = await Item.findById(id);
         if(req.user == item.user)
         {
-            const item = await Item.findById(id);
             res.status(StatusCode.OK).json(item);
         }
         else
@@ -121,8 +122,17 @@ const deleteItem = async (req, res) => {
     const { id } = req.params;
 
     try {
-        const item = await Item.findByIdAndRemove(id);
-        res.status(StatusCode.OK).json(item);
+        const item = await Item.findById(id);
+        if(req.user == item.user)
+        {
+            const item = await Item.findByIdAndDelete(id);
+            res.status(StatusCode.OK).json(item);
+        }
+        else
+        {
+            res.status(StatusCode.FORBIDDEN);
+        }
+
     } catch (err) {
         res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
     }
