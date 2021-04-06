@@ -8,7 +8,6 @@ const StatusCode = require('../helpers/constants');
 const config = require('../config');
 const sendEmail = require('../helpers/email');
 const { validateLogin, validateSignup } = require('../helpers/validation');
-const { reset } = require('nodemon');
 
 const salt = 6;
 
@@ -81,7 +80,6 @@ const signup = async (req, res) => {
         } else {
             const {firstName, lastName, email, password} = req.body;
             user = new User({firstName, lastName, email, password});
-
             // encrypt the raw password
             const encrypt = await bcrypt.genSalt(salt);
             user.password = await bcrypt.hash(user.password, encrypt);
@@ -104,37 +102,35 @@ const signup = async (req, res) => {
  */
 const forgotPassword = async (req, res) => {
     try{
-        const email = req.body.email;
-
+        const { email } = req.body;
         try {
 
             const user = await User.findOne({ email });
             if (!user) {
                 return res.status(StatusCode.BAD_REQUEST).json({ message: 'email does not exist' });
             }
+            let token = await ResetToken.findOne({ user: user._id });
+            if (token) {
+                await token.deleteOne();
+            }
+            let resetToken = crypto.randomBytes(32).toString("hex");
+            const hash = await bcrypt.hash(resetToken, salt);
+            await new ResetToken({ user: user._id, token: hash, expiresAt: Date.now() + 3600000 }).save(); // expires in 1 hours
+    
+            const html =  '<p>You are receiving this because we received a password reset request from your account. Please click on the following link, or paste the link into your browser within an hour of receiving it to reset your password:</p>'
+                        + `<a href='http://${config.clientURL}/reset/?token=${resetToken}&userId=${user._id}'>Reset Password</a>`
+                        + '<p>If you did not request this, please ignore this email and your password will remain unchanged.</p>'
+                        + '<p>Thank you,</p>'
+                        + '<p>Collectrs</p>';
 
-                const resetToken = await ResetToken.findOne({ user: user._id });
-                if (resetToken) {
-                    await resetToken.deleteOne();
-                    const resetToken = crypto.randomBytes(32).toString("hex");
-                    const hash = bcrypt.hash(token, salt);
+            const subject = 'Password Reset Request';
 
-                    await new ResetToken({ userId: user._id, token: hash, createdAt: Date.now() }).save();
-            
-                    const body =  'You are receiving this because we received a password reset request from your account.\n\n'
-                                + 'Please click on the following link, or paste the link into your browser within an hour of receiving it to reset your password:\n\n'
-                                + `${config.clientURL}/reset/?token=${resetToken}&userId=${user._id}\n\n`
-                                + `If you did not request this, please ignore this email and your password will remain unchanged`;
-        
-                    const subject = 'Password Reset Request';
-        
-                    try {
-                        await sendEmail(user.email, subject, body);
-                        return res.status(StatusCode.OK).json({ message: 'password reset email sent' });
-                    } catch (err) {
-                        console.log(err); 
-                    }
-                }
+            try {
+                await sendEmail(user.email, subject, html);
+                return res.status(StatusCode.OK).json({ message: 'password reset email sent' });
+            } catch (err) {
+                console.log(err); 
+            }
                 
         } catch (err) {
             console.log(err);
@@ -152,10 +148,9 @@ const forgotPassword = async (req, res) => {
  */
 const resetPassword = async (req, res) => {
     try{
-        const { token, userId } = req.params;
-        const { password } = req.body;
+        const { token, userId, password } = req.body;
 
-        const passwordResetToken = await Token.findOne({ userId });
+        const passwordResetToken = await ResetToken.findOne({ user: userId, expiresAt: {$gt: Date.now()} });
 
         if (!passwordResetToken) {
             res.status(StatusCode.BAD_REQUEST).json({ message: "invalid or expired password reset token" });
@@ -169,12 +164,14 @@ const resetPassword = async (req, res) => {
         const hash = await bcrypt.hash(password, salt);
 
         const user = await User.findByIdAndUpdate(userId, { $set: { password: hash } }, { new: true });
-        const body =  'Your password has been changed successfully.\n\n'
+        const html =  '<p>Your password has been reset successfully.<p>' 
+                    + '<p>Thank you,</p>'
+                    + '<p>Collectrs</p>';
 
-        const subject = 'Password Change Sucessfull';
+        const subject = 'Password Reset Sucessful';
 
         try {
-            await sendEmail(user.email, subject, body);
+            await sendEmail(user.email, subject, html);
             return res.status(StatusCode.OK).json({ message: 'password sucessfully changed' });
         } catch (err) {
             console.log(err); 
