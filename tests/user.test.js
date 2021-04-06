@@ -60,7 +60,10 @@ describe('User Test', () => {
         const response = await chai
             .request(app)
             .post('/users/login')
-            .send(loginInfo);
+            .send(loginInfo)
+
+        // loginInfo.id = response.body._id;
+        loginInfo.id = response.body._id;
 
         response.should.have.status(statusCode.OK);
         response.body.should.have.property('auth').eql(true);

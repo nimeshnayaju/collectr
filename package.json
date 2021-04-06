@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "scripts": {
     "start": "node server/server.js",
-    "nodemon-server": "nodemon server/server.js",
+    "dev-start": "nodemon server/server.js",
     "eslint": "eslint ./",
     "eslint-fix": "eslint ./ --fix",
     "test": "mocha --timeout 10000 \"./tests/*.test.js\" -exit"
@@ -17,6 +17,7 @@
     "is-empty": "^1.2.0",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.11.15",
+    "sendmail": "^1.6.1",
     "validator": "^13.5.2"
   },
   "devDependencies": {
@@ -26,6 +27,7 @@
     "eslint-config-airbnb-base": "^14.2.1",
     "eslint-plugin-import": "^2.22.1",
     "mocha": "^8.3.0",
+    "nodemailer": "^6.5.0",
     "nodemon": "^2.0.7"
   }
 }
