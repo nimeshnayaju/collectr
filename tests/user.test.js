@@ -64,7 +64,8 @@ describe('User Test', () => {
         loginInfo.id = response.body._id;
 
         response.should.have.status(statusCode.OK);
-        response.body.should.be.a('object');
+        response.body.should.have.property('auth').eql(true);
+        response.body.should.have.property('token');
         });
     });
 });
