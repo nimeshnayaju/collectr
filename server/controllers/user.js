@@ -35,8 +35,10 @@ const login = async (req, res) => {
         if (user) {
             const isPassword = await bcrypt.compare(password, user.password);
 
-            if (!isPassword || user.status === "Pending") {
-                res.status(StatusCode.BAD_REQUEST).json({ auth: false, token: null });
+            if (!isPassword)
+                res.status(StatusCode.BAD_REQUEST).json({ message: "Incorrect email or password" });
+            if (user.status !== "Active") {
+                res.status(StatusCode.BAD_REQUEST).json({ message: "Pending account. Please verify your email!" });
             }
             else {
                 // payload for JWT
@@ -95,7 +97,7 @@ const signup = async (req, res) => {
             }
             let verificationToken = crypto.randomBytes(32).toString("hex");
             const hash = await bcrypt.hash(verificationToken, salt);
-            await new Token({ user: user._id, token: hash, expiresAt: Date.now() + 3600000 }).save(); // expires in 1 hours
+            await new Token({ user: user._id, token: hash, expiresAt: Date.now() + 86400000 }).save(); // expires in 1 day
     
             const html =  '<p>Please click on the following link within the next one hour to verify your account on Collectrs</p>'
                         + `<a href='http://${config.clientURL}/users/signup/verify/?token=${verificationToken}&userId=${user._id}'>Verify Account</a>`

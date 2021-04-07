@@ -42,10 +42,10 @@ const getPublicCatalogs = async (req, res) => {
  * @returns {Promise<void>} the promise indicating success
  */
 const addCatalog = async (req, res) => {
-    const { name, description, isPrivate } = req.body;
+    const { name, description, isPrivate, itemFields } = req.body;
     const user = req.user;
 
-    const catalog = new Catalog({ name, description, isPrivate, user});
+    const catalog = new Catalog({ name, description, isPrivate, user, itemFields});
 
     try {
         const newCatalog = await catalog.save();
