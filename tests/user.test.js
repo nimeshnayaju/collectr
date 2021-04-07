@@ -11,15 +11,15 @@ const should = chai.should();
 chai.use(chaiHttp);
 
 const newUser = {
-  firstName: 'Ludwig',
-  lastName: 'Beethoven',
-  email: 'lbee@music.com',
-  password: 'ilovepiano',
+  firstName: 'test',
+  lastName: 'test',
+  email: 'test@test.com',
+  password: 'test123',
 };
 
 const loginInfo = {
-  email: 'lbee@music.com',
-  password: 'ilovepiano',
+  email: newUser.email,
+  password: newUser.password,
 };
 
 describe('User Test', () => {
@@ -40,14 +40,8 @@ describe('User Test', () => {
         .post('/users/signup')
         .send(newUser);
 
-      newUser.id = response.body._id;
-
       response.should.have.status(statusCode.CREATED);
-      response.body.should.be.a('object');
-      response.body.should.have.property('firstName');
-      response.body.should.have.property('lastName');
-      response.body.should.have.property('email');
-      response.body.should.have.property('password');
+      response.body.should.have.property('message').eql("verification email sent");
     });
   });
 
@@ -62,24 +56,9 @@ describe('User Test', () => {
             .post('/users/login')
             .send(loginInfo)
 
-        // loginInfo.id = response.body._id;
-        loginInfo.id = response.body._id;
-
-        response.should.have.status(statusCode.OK);
-        response.body.should.have.property('auth').eql(true);
-        response.body.should.have.property('token');
+        response.should.have.status(statusCode.BAD_REQUEST);
+        response.body.should.have.property('auth').eql(false);
+        response.body.should.have.property('token').eql(null);
         });
     });
-
-  /**
-   *  Test auth middleware
-   */
-  describe('auth test', () => {
-    it('should verify jwt payload', async () => {
-
-
-
-
-    })
-  })
 });

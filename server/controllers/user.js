@@ -2,13 +2,12 @@ const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 const jwt = require("jsonwebtoken");
 
-const ResetToken = require("../models/resetToken.js");
+const Token = require("../models/token.js");
 const User = require('../models/user');
 const StatusCode = require('../helpers/constants');
 const config = require('../config');
 const sendEmail = require('../helpers/email');
 const { validateLogin, validateSignup } = require('../helpers/validation');
-
 const salt = 6;
 
 
@@ -36,8 +35,9 @@ const login = async (req, res) => {
         if (user) {
             const isPassword = await bcrypt.compare(password, user.password);
 
-            if (!isPassword)
+            if (!isPassword || user.status === "Pending") {
                 res.status(StatusCode.BAD_REQUEST).json({ auth: false, token: null });
+            }
             else {
                 // payload for JWT
                 const payload = { id: user.id };
@@ -50,7 +50,7 @@ const login = async (req, res) => {
             }
 
         } else {
-            res.status(StatusCode.BAD_REQUEST).json({ message: "User not found" });
+            res.status(StatusCode.BAD_REQUEST).json({ message: "user not found" });
         }
     } catch (err) {
         res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
@@ -69,31 +69,83 @@ const signup = async (req, res) => {
         const { errors, isValid } = validateSignup(req.body);
 
         if (!isValid) {
-            return res.status(StatusCode.BAD_REQUEST).json(errors);
+            res.status(StatusCode.BAD_REQUEST).json(errors);
         }
 
         // find if the user with the specified email already exist
         let user = await User.findOne({ email: req.body.email });
 
-        if (user) {
+        if (user && user.status === "Active") {
             res.status(StatusCode.BAD_REQUEST).json({ message: 'User already found!' });
 
         } else {
-            const {firstName, lastName, email, password} = req.body;
-            user = new User({firstName, lastName, email, password});
-            // encrypt the raw password
-            const encrypt = await bcrypt.genSalt(salt);
-            user.password = await bcrypt.hash(user.password, encrypt);
+            if (!user) {
+                const {firstName, lastName, email, password} = req.body;
+                user = new User({firstName, lastName, email});
+                // encrypt the raw password
+                const encrypt = await bcrypt.genSalt(salt);
+                user.password = await bcrypt.hash(password, encrypt);
+                
+                await user.save();
+            }
 
-            const newUser = await user.save();
-            res.status(StatusCode.CREATED).json( newUser );
+            let token = await Token.findOne({ user: user._id });
+            if (token) {
+                await token.deleteOne();
+            }
+            let verificationToken = crypto.randomBytes(32).toString("hex");
+            const hash = await bcrypt.hash(verificationToken, salt);
+            await new Token({ user: user._id, token: hash, expiresAt: Date.now() + 3600000 }).save(); // expires in 1 hours
+    
+            const html =  '<p>Please click on the following link within the next one hour to verify your account on Collectrs</p>'
+                        + `<a href='http://${config.clientURL}/users/signup/verify/?token=${verificationToken}&userId=${user._id}'>Verify Account</a>`
+                        + '<p>Thank you,</p>'
+                        + '<p>Collectrs</p>';
+
+            const subject = 'Activate Your Collectrs Account';
+
+            try {
+                await sendEmail(user.email, subject, html);
+                return res.status(StatusCode.CREATED).json({ message: 'verification email sent' });
+            } catch (err) {
+                console.log(err); 
+            }
         }
     } catch (err) {
-
         res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
 
     }
 };
+
+/**
+ * Sign up user after email verification
+ * @param req request object containing information about HTTP request
+ * @param res the response object used for sending back the desired HTTP response
+ * @returns {Promise<void>} the promise indicating success
+ */
+const verifySignup = async (req, res) => {
+    try{
+        const { token, userId } = req.query;
+
+        const verificationToken = await Token.findOne({ user: userId, expiresAt: {$gt: Date.now()} });
+        if (!verificationToken) {
+            res.status(StatusCode.BAD_REQUEST).json({ message: "invalid or expired verification token" });
+        }
+
+        const isValid = await bcrypt.compare(token, verificationToken.token);
+        if (!isValid) {
+            res.status(StatusCode.BAD_REQUEST).json({ message: "invalid or expired verification token" });
+        }
+
+        await User.findByIdAndUpdate(userId, { $set: { status: "Active" } }, { new: true });
+        verificationToken.deleteOne();
+        res.status(StatusCode.CREATED).send("Your account has been activated successfully");
+
+    } catch (err) {
+        res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
+    }
+};
+
 
 /**
  * Sends an email to the user with a link to reset their password
@@ -110,13 +162,13 @@ const forgotPassword = async (req, res) => {
             if (!user) {
                 return res.status(StatusCode.BAD_REQUEST).json({ message: 'email does not exist' });
             }
-            let token = await ResetToken.findOne({ user: user._id });
+            let token = await Token.findOne({ user: user._id });
             if (token) {
                 await token.deleteOne();
             }
             let resetToken = crypto.randomBytes(32).toString("hex");
             const hash = await bcrypt.hash(resetToken, salt);
-            await new ResetToken({ user: user._id, token: hash, expiresAt: Date.now() + 3600000 }).save(); // expires in 1 hours
+            await new Token({ user: user._id, token: hash, expiresAt: Date.now() + 3600000 }).save(); // expires in 1 hours
     
             const html =  '<p>You are receiving this because we received a password reset request from your account. Please click on the following link, or paste the link into your browser within an hour of receiving it to reset your password:</p>'
                         + `<a href='http://${config.clientURL}/reset/?token=${resetToken}&userId=${user._id}'>Reset Password</a>`
@@ -151,7 +203,7 @@ const resetPassword = async (req, res) => {
     try{
         const { token, userId, password } = req.body;
 
-        const passwordResetToken = await ResetToken.findOne({ user: userId, expiresAt: {$gt: Date.now()} });
+        const passwordResetToken = await Token.findOne({ user: userId, expiresAt: {$gt: Date.now()} });
 
         if (!passwordResetToken) {
             res.status(StatusCode.BAD_REQUEST).json({ message: "invalid or expired password reset token" });
@@ -173,6 +225,7 @@ const resetPassword = async (req, res) => {
 
         try {
             await sendEmail(user.email, subject, html);
+            passwordResetToken.deleteOne();
             return res.status(StatusCode.OK).json({ message: 'password sucessfully changed' });
         } catch (err) {
             console.log(err); 
@@ -187,6 +240,7 @@ const resetPassword = async (req, res) => {
 
 module.exports = {
     login,
+    verifySignup,
     signup,
     forgotPassword,
     resetPassword,
