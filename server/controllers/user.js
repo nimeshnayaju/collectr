@@ -35,10 +35,8 @@ const login = async (req, res) => {
         if (user) {
             const isPassword = await bcrypt.compare(password, user.password);
 
-            if (!isPassword)
+            if (!isPassword || user.status === "Pending") {
                 res.status(StatusCode.BAD_REQUEST).json({ auth: false, token: null });
-            if (user.status !== "Active") {
-                res.status(StatusCode.BAD_REQUEST).json({message: "Pending account. Please verify your email!"});
             }
             else {
                 // payload for JWT
@@ -108,7 +106,7 @@ const signup = async (req, res) => {
 
             try {
                 await sendEmail(user.email, subject, html);
-                return res.status(StatusCode.OK).json({ message: 'verification email sent' });
+                return res.status(StatusCode.CREATED).json({ message: 'verification email sent' });
             } catch (err) {
                 console.log(err); 
             }
