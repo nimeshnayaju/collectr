@@ -11,15 +11,15 @@ const should = chai.should();
 chai.use(chaiHttp);
 
 const newUser = {
-  firstName: 'Ludwig',
-  lastName: 'Beethoven',
-  email: 'lbee@music.com',
-  password: 'ilovepiano',
+  firstName: 'test',
+  lastName: 'test',
+  email: 'test@test.com',
+  password: 'test123',
 };
 
 const loginInfo = {
-  email: 'lbee@music.com',
-  password: 'ilovepiano',
+  email: 'test@test.com',
+  password: 'test123',
 };
 
 describe('User Test', () => {
