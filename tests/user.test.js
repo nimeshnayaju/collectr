@@ -3,6 +3,8 @@ const chaiHttp = require('chai-http');
 const app = require('../server/server');
 const statusCode = require('../server/helpers/constants');
 const User = require('../server/models/user');
+const accessTokenSecret = 'supersecretshh';
+
 
 const should = chai.should();
 
@@ -15,16 +17,9 @@ const newUser = {
   password: 'ilovepiano',
 };
 
-let verifyToken = null;
-let passwordToken = null;
-
 const loginInfo = {
   email: 'lbee@music.com',
   password: 'ilovepiano',
-};
-
-const resetPasswordInfo = {
-  email: 'lbee@music.com',
 };
 
 describe('User Test', () => {
@@ -35,40 +30,27 @@ describe('User Test', () => {
   });
 
   /**
-  * Test POST /signupReq
+  * Test POST /signup
   */
-  describe('POST /signupReq', () => {
+  describe('POST /signup', () => {
     it('should register a new user', async () => {
       // Add the mock user object
       const response = await chai
         .request(app)
-        .post('/users/signupReq')
+        .post('/users/signup')
         .send(newUser);
 
       newUser.id = response.body._id;
 
-      response.should.have.status(statusCode.OK);
-      response.body.should.have.a.property('verifyToken')
-      verifyToken = response.body.confirmationToken;
-    });
-  });
-
-  /**
-   * Test POST /signup
-   */
-  describe('POST /signup', () => {
-    it('should signup a user after they verify their email', async () => {
-      // Add the mock user object
-      const response = await chai
-          .request(app)
-          .post('/users/signup')
-          .send(verifyToken);
-
-      newUser.id = response.body._id;
-      response.body.should.be.a('object');
       response.should.have.status(statusCode.CREATED);
+      response.body.should.be.a('object');
+      response.body.should.have.property('firstName');
+      response.body.should.have.property('lastName');
+      response.body.should.have.property('email');
+      response.body.should.have.property('password');
     });
   });
+
     /**
     * Test POST /login
     */
@@ -84,25 +66,8 @@ describe('User Test', () => {
         loginInfo.id = response.body._id;
 
         response.should.have.status(statusCode.OK);
-        response.body.should.be.a('object');
+        response.body.should.have.property('auth').eql(true);
+        response.body.should.have.property('token');
         });
     });
-
-  /**
-   * Test POST /passwordResetReq
-   */
-  describe('POST /passwordResetReq', () => {
-    it('should send the user an email to reset their password', async () => {
-      // mock user object
-      const response = await chai
-          .request(app)
-          .post('/users/passwordResetReq')
-          .send(resetPasswordInfo)
-
-      response.should.have.status(statusCode.OK);
-      response.body.should.have.property('resetToken')
-      passwordToken = response.body.resetToken;
-    });
-  });
-
 });

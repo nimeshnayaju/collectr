@@ -3,13 +3,14 @@
   "version": "0.0.1",
   "scripts": {
     "start": "node server/server.js",
-    "nodemon-server": "nodemon server/server.js",
+    "dev-start": "nodemon server/server.js",
     "eslint": "eslint ./",
     "eslint-fix": "eslint ./ --fix",
     "test": "mocha --timeout 10000 \"./tests/*.test.js\" -exit"
   },
   "dependencies": {
     "bcrypt": "^5.0.1",
+    "chai-each": "0.0.1",
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",

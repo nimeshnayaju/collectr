@@ -1,13 +1,16 @@
 const bcrypt = require('bcrypt');
+const crypto = require('crypto');
 const jwt = require("jsonwebtoken");
+
 const Token = require("../models/token.js");
 const User = require('../models/user');
 const StatusCode = require('../helpers/constants');
 const config = require('../config');
-const sendEmail = require('../helpers/sendEmail');
+const sendEmail = require('../helpers/email');
 const { validateLogin, validateSignup } = require('../helpers/validation');
 const salt = 6;
 const crypto = require('crypto');
+
 
 /**
  * Logs a user in using their email and password
@@ -36,21 +39,21 @@ const login = async (req, res) => {
             if (!isPassword)
                 res.status(StatusCode.BAD_REQUEST).json({ auth: false, token: null });
             if (user.status !== "Active") {
-                res.status(StatusCode.BAD_REQUEST).json({message: "Pending Account. Please Verify Your Email!"});
+                res.status(StatusCode.BAD_REQUEST).json({message: "Pending account. Please verify your email!"});
             }
             else {
                 // payload for JWT
-                const payload = { email: email };
+                const payload = { id: user.id };
 
                 // generate access token
-                const token = await jwt.sign(payload, "key", config.signOptions);
+                const token = await jwt.sign(payload, config.accessTokenSecret, config.signOptions);
                 
                 res.json({ auth: true, token: token });
 
             }
 
         } else {
-            res.status(StatusCode.BAD_REQUEST).json({ message: "User not found" });
+            res.status(StatusCode.BAD_REQUEST).json({ message: "user not found" });
         }
     } catch (err) {
         res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
@@ -79,34 +82,38 @@ const signupReq = async (req, res) => {
             res.status(StatusCode.BAD_REQUEST).json({ message: 'User already found!' });
 
         } else {
-            let verifyToken = crypto.randomBytes(32).toString("hex"); //creating the token to be sent to the forgot password form (react)
-            const hash = await bcrypt.hash(verifyToken, Number(salt));
 
             const {firstName, lastName, email, password} = req.body;
-            user = new User({firstName, lastName, email, password, verifyToken});
+            user = new User({firstName, lastName, email});
             // encrypt the raw password
             const encrypt = await bcrypt.genSalt(salt);
             user.password = await bcrypt.hash(password, encrypt);
-            user.save((err) => {
-                if (err) {
-                    res.status(StatusCode.INTERNAL_SERVER_ERROR).send({message: err.message});
-                }
-            });
-            await new Token({
-                userId: user._id,
-                token: hash,
-                createdAt: Date.now(),
-            }).save();
-            await sendEmail(
-                user.email,
-                "Email Verification",
-                {
-                    firstName: user.firstName,
-                    link: `${'http://127.0.0.1:8000'}/signup?token=${verifyToken}&id=${user._id}`,
-                },
-                "./signupVerification.handlebars"
-            );
-            res.status(StatusCode.OK).json({ message: "Email Sent", verifyToken});
+            
+            const newUser = await user.save();
+
+            let token = await Token.findOne({ user: user._id });
+            if (token) {
+                await token.deleteOne();
+            }
+            let verificationToken = crypto.randomBytes(32).toString("hex");
+            const hash = await bcrypt.hash(verificationToken, salt);
+            await new Token({ user: user._id, token: hash, expiresAt: Date.now() + 3600000 }).save(); // expires in 1 hours
+    
+            const html =  '<p>Please click on the following link within the next one hour to verify your account on Collectrs</p>'
+                        + `<a href='http://${config.clientURL}/signup/verify/?token=${token}&userId=${user._id}'>Verify Account</a>`
+                        + '<p>Thank you,</p>'
+                        + '<p>Collectrs</p>';
+
+            const subject = 'Activate Your Collectrs Account';
+
+            try {
+                await sendEmail(user.email, subject, html);
+                return res.status(StatusCode.OK).json({ message: 'password reset email sent' });
+            } catch (err) {
+                console.log(err); 
+            }
+            
+            res.status(StatusCode.CREATED).json({ message: "verification email sent" });
         }
     } catch (err) {
         res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
@@ -136,44 +143,51 @@ const signup = async (req, res) => {
         //     })
     } catch (err) {
         res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
-    }};
+    }
+};
+
+
 /**
- * User request to change password.
+ * Sends an email to the user with a link to reset their password
  * @param req request object containing information about HTTP request
  * @param res the response object used for sending back the desired HTTP response
  * @returns {Promise<void>} the promise indicating success
  */
-const passwordResetReq = async (req, res) => {
+const forgotPassword = async (req, res) => {
     try{
-        // const crypto = require('crypto');
-        const email = req.body.email;
-        const user = await User.findOne({ email });
-        if (!user)
-            res.status(StatusCode.BAD_REQUEST).json({ message: 'Email does not exist' });
-        let token = await Token.findOne({ userId: user._id });
-        if (token) await Token.deleteOne();
+        const { email } = req.body;
+        try {
 
-        let resetToken = crypto.randomBytes(32).toString("hex"); //creating the token to be sent to the forgot password form (react)
-        const hash = await bcrypt.hash(resetToken, Number(salt));
-        await new Token({
-            userId: user._id,
-            token: hash,
-            createdAt: Date.now(),
-        }).save();
-         sendEmail(
-            user.email,
-            "Password Reset Request",
-            {
-                firstName: user.firstName,
-                link: `${'http://127.0.0.1:8000'}/passwordReset?token=${resetToken}&id=${user._id}`,
-            },
-            "./resetPassword.handlebars"
-        );
-        // console.log(user._id)
-        // console.log(resetToken);
+            const user = await User.findOne({ email });
+            if (!user) {
+                return res.status(StatusCode.BAD_REQUEST).json({ message: 'email does not exist' });
+            }
+            let token = await Token.findOne({ user: user._id });
+            if (token) {
+                await token.deleteOne();
+            }
+            let resetToken = crypto.randomBytes(32).toString("hex");
+            const hash = await bcrypt.hash(resetToken, salt);
+            await new Token({ user: user._id, token: hash, expiresAt: Date.now() + 3600000 }).save(); // expires in 1 hours
+    
+            const html =  '<p>You are receiving this because we received a password reset request from your account. Please click on the following link, or paste the link into your browser within an hour of receiving it to reset your password:</p>'
+                        + `<a href='http://${config.clientURL}/reset/?token=${resetToken}&userId=${user._id}'>Reset Password</a>`
+                        + '<p>If you did not request this, please ignore this email and your password will remain unchanged.</p>'
+                        + '<p>Thank you,</p>'
+                        + '<p>Collectrs</p>';
 
+            const subject = 'Password Reset Request';
 
-        res.status(StatusCode.OK).json({ message: 'Email sent', resetToken });
+            try {
+                await sendEmail(user.email, subject, html);
+                return res.status(StatusCode.OK).json({ message: 'password reset email sent' });
+            } catch (err) {
+                console.log(err); 
+            }
+                
+        } catch (err) {
+            console.log(err);
+        }
     } catch(err){
             res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
         }
@@ -185,47 +199,41 @@ const passwordResetReq = async (req, res) => {
  * @param res the response object used for sending back the desired HTTP response
  * @returns {Promise<void>} the promise indicating success
  */
-const passwordReset = async (req, res) => {
+const resetPassword = async (req, res) => {
     try{
-        const userId = req.body.userId;
-        const token = req.body.token;
-        const password = req.body.password
+        const { token, userId, password } = req.body;
 
-        let passwordResetToken = await Token.findOne({ userId });
+        const passwordResetToken = await Token.findOne({ user: userId, expiresAt: {$gt: Date.now()} });
 
         if (!passwordResetToken) {
-            res.status(StatusCode.BAD_REQUEST).json({ message: "Invalid or expired password reset token" });
+            res.status(StatusCode.BAD_REQUEST).json({ message: "invalid or expired password reset token" });
         }
 
         const isValid = await bcrypt.compare(token, passwordResetToken.token);
-
         if (!isValid) {
-            res.status(StatusCode.BAD_REQUEST).json({ message: "Invalid or expired password reset token" });
+            res.status(StatusCode.BAD_REQUEST).json({ message: "invalid or expired password reset token" });
         }
 
-        const hash = await bcrypt.hash(password, Number(salt));
+        const hash = await bcrypt.hash(password, salt);
 
-        await User.updateOne(
-            { _id: userId },
-            { $set: { password: hash } },
-            { new: true }
-        );
+        const user = await User.findByIdAndUpdate(userId, { $set: { password: hash } }, { new: true });
+        const html =  '<p>Your password has been reset successfully.<p>' 
+                    + '<p>Thank you,</p>'
+                    + '<p>Collectrs</p>';
 
-        const user = await User.findById({ _id: userId });
-        sendEmail(
-            user.email,
-            "Password Reset Successfully",
-            {
-                firstName: user.firstName,
-            },
-            "./passwordSuccess.handlebars"
-        );
+        const subject = 'Password Reset Sucessful';
 
-        await passwordResetToken.deleteOne();
-        res.status(StatusCode.OK).json({ message: 'Password successfully changed' });
+        try {
+            await sendEmail(user.email, subject, html);
+            return res.status(StatusCode.OK).json({ message: 'password sucessfully changed' });
+        } catch (err) {
+            console.log(err); 
+        }
 
-    }catch(err){
+    } catch(err){
+
         res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
+
     }
 };
 
@@ -233,8 +241,8 @@ module.exports = {
     login,
     signupReq,
     signup,
-    passwordReset,
-    passwordResetReq,
+    forgotPassword,
+    resetPassword,
 };
 
 
