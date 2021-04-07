@@ -3,10 +3,10 @@ const Catalog = require('../models/catalog');
 const StatusCode = require('../helpers/constants');
 
 const addItem = async (req, res) => {
-    const { name, date, manufacturer } = req.body;
+    const { name, startDate, endDate, manufacturer, condition, provenance, description } = req.body;
     const catalogId = req.body.catalog;
 
-    const item = new Item({ name, date, manufacturer });
+    const item = new Item({ name, startDate, endDate, manufacturer, condition, provenance, description });
 
     try {
         // check if the catalog id sent in the request body is a valid id or not
