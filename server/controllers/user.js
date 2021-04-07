@@ -9,7 +9,6 @@ const config = require('../config');
 const sendEmail = require('../helpers/email');
 const { validateLogin, validateSignup } = require('../helpers/validation');
 const salt = 6;
-const crypto = require('crypto');
 
 
 /**
@@ -66,7 +65,7 @@ const login = async (req, res) => {
  * @param res the response object used for sending back the desired HTTP response
  * @returns {Promise<void>} the promise indicating success
  */
-const signupReq = async (req, res) => {
+const signup = async (req, res) => {
     try {
         // form validation
         const { errors, isValid } = validateSignup(req.body);
@@ -78,18 +77,19 @@ const signupReq = async (req, res) => {
         // find if the user with the specified email already exist
         let user = await User.findOne({ email: req.body.email });
 
-        if (user) {
+        if (user && user.status === "Active") {
             res.status(StatusCode.BAD_REQUEST).json({ message: 'User already found!' });
 
         } else {
-
-            const {firstName, lastName, email, password} = req.body;
-            user = new User({firstName, lastName, email});
-            // encrypt the raw password
-            const encrypt = await bcrypt.genSalt(salt);
-            user.password = await bcrypt.hash(password, encrypt);
-            
-            const newUser = await user.save();
+            if (!user) {
+                const {firstName, lastName, email, password} = req.body;
+                user = new User({firstName, lastName, email});
+                // encrypt the raw password
+                const encrypt = await bcrypt.genSalt(salt);
+                user.password = await bcrypt.hash(password, encrypt);
+                
+                await user.save();
+            }
 
             let token = await Token.findOne({ user: user._id });
             if (token) {
@@ -100,7 +100,7 @@ const signupReq = async (req, res) => {
             await new Token({ user: user._id, token: hash, expiresAt: Date.now() + 3600000 }).save(); // expires in 1 hours
     
             const html =  '<p>Please click on the following link within the next one hour to verify your account on Collectrs</p>'
-                        + `<a href='http://${config.clientURL}/signup/verify/?token=${token}&userId=${user._id}'>Verify Account</a>`
+                        + `<a href='http://${config.clientURL}/users/signup/verify/?token=${verificationToken}&userId=${user._id}'>Verify Account</a>`
                         + '<p>Thank you,</p>'
                         + '<p>Collectrs</p>';
 
@@ -108,12 +108,10 @@ const signupReq = async (req, res) => {
 
             try {
                 await sendEmail(user.email, subject, html);
-                return res.status(StatusCode.OK).json({ message: 'password reset email sent' });
+                return res.status(StatusCode.OK).json({ message: 'verification email sent' });
             } catch (err) {
                 console.log(err); 
             }
-            
-            res.status(StatusCode.CREATED).json({ message: "verification email sent" });
         }
     } catch (err) {
         res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
@@ -127,20 +125,24 @@ const signupReq = async (req, res) => {
  * @param res the response object used for sending back the desired HTTP response
  * @returns {Promise<void>} the promise indicating success
  */
-const signup = async (req, res) => {
+const verifySignup = async (req, res) => {
     try{
-        let user = await User.findOne({
-            confirmationCode: req.params.confirmationCode,
-        })
-        if (!user) {
-            res.status(StatusCode.BAD_REQUEST).json({message: "User Not found." });
+        const { token, userId } = req.query;
+
+        const verificationToken = await Token.findOne({ user: userId, expiresAt: {$gt: Date.now()} });
+        if (!verificationToken) {
+            res.status(StatusCode.BAD_REQUEST).json({ message: "invalid or expired verification token" });
         }
-        user.status = "Active";
-        const newUser = await user.save();
-        res.status(StatusCode.CREATED).json({newUser});
-        // console.log(newUser);
-        // });
-        //     })
+
+        const isValid = await bcrypt.compare(token, verificationToken.token);
+        if (!isValid) {
+            res.status(StatusCode.BAD_REQUEST).json({ message: "invalid or expired verification token" });
+        }
+
+        await User.findByIdAndUpdate(userId, { $set: { status: "Active" } }, { new: true });
+        verificationToken.deleteOne();
+        res.status(StatusCode.CREATED).send("Your account has been activated successfully");
+
     } catch (err) {
         res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
     }
@@ -225,6 +227,7 @@ const resetPassword = async (req, res) => {
 
         try {
             await sendEmail(user.email, subject, html);
+            passwordResetToken.deleteOne();
             return res.status(StatusCode.OK).json({ message: 'password sucessfully changed' });
         } catch (err) {
             console.log(err); 
@@ -239,7 +242,7 @@ const resetPassword = async (req, res) => {
 
 module.exports = {
     login,
-    signupReq,
+    verifySignup,
     signup,
     forgotPassword,
     resetPassword,
