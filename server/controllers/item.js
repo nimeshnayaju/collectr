@@ -15,9 +15,9 @@ const getItemFields = async (req, res) => {
 
 const addItem = async (req, res) => {
     const catalogId = req.body.catalog;
-    const user = req.user;
 
     const item = new Item( req.body );
+    item.user = req.user;
 
     try {
         // check if the catalog id sent in the request body is a valid id or not

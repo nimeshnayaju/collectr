@@ -9,8 +9,7 @@ const UserSchema = new mongoose.Schema({
         type: String,
         enum: ['Pending', 'Active'],
         default: 'Pending'
-    },
-    confirmationToken: {type: String, unique: true }
+    }
 })
 
 module.exports = mongoose.model('User', UserSchema);
