@@ -7,7 +7,7 @@ const getItemFields = async (req, res) => {
     try {
         let catalog = await Catalog.findById(catalogId);
         const itemFields = catalog.itemFields;
-        return res.status(StatusCode.OK).json({ itemFields });
+        return res.status(StatusCode.OK).json( itemFields );
     } catch (err) {
         console.log(err);
     }
