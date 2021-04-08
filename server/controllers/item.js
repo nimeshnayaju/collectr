@@ -2,12 +2,22 @@ const Item = require('../models/item');
 const Catalog = require('../models/catalog');
 const StatusCode = require('../helpers/constants');
 
+const getItemFields = async (req, res) => {
+    const catalogId = req.params.id;
+    try {
+        let catalog = await Catalog.findById(catalogId);
+        const itemFields = catalog.itemFields;
+        return res.status(StatusCode.OK).json( itemFields );
+    } catch (err) {
+        console.log(err);
+    }
+}
+
 const addItem = async (req, res) => {
-    const { name, date, manufacturer, isPrivate } = req.body;
     const catalogId = req.body.catalog;
     const user = req.user;
 
-    const item = new Item({ name, date, manufacturer, isPrivate, user });
+    const item = new Item( req.body );
 
     try {
         // check if the catalog id sent in the request body is a valid id or not
@@ -15,7 +25,6 @@ const addItem = async (req, res) => {
         if (catalog != null) {
             try {
                 const newItem = await item.save();
-
                 catalog.items.push(newItem._id);
                 catalog.save();
                 
@@ -46,21 +55,6 @@ const getItems = async (req, res) => {
 
 
 /**
- * Lists all Item objects that are public
- * @param req request object containing information about HTTP request
- * @param res the response object used for sending back the desired HTTP response
- * @returns {Promise<void>} the promise indicating success
- */
-const getPublicItems = async (req, res) => {
-    try {
-        const items = await Item.find( {isPrivate: false} )
-        res.status(StatusCode.OK).json ( items );
-    } catch (err) {
-        res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
-    }
-};
-
-/**
  * Updates a pre-existing Item object
  * @param req request object containing information about HTTP request
  * @param res the response object used for sending back the desired HTTP response
@@ -74,14 +68,13 @@ const updateItem = async (req, res) => {
         const item = await Item.findById(id);
         if(req.user == item.user)
         {
-            const updatedItem = await Item.findByIdAndUpdate(id, { $set: req.body }, { new: true });
+            const updatedItem = await Item.findByIdAndUpdate(id, { $set: req.body }, { new: true, overwrite: true });
             res.status(StatusCode.OK).json( updatedItem );
         }
         else
         {
             res.status(StatusCode.FORBIDDEN);
         }
-
     } catch (err) {
         res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
     }
@@ -141,8 +134,8 @@ const deleteItem = async (req, res) => {
 
 module.exports = {
     addItem,
+    getItemFields,
     getItems,
-    getPublicItems,
     updateItem,
     getItem,
     deleteItem

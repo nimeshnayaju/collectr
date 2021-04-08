@@ -18,13 +18,6 @@ const catalog = {
     isPrivate: true
 };
 
-const item = {
-    name: '1912 Gibson Mandolin-Guitar Mfg. Co. Style U',
-    date: '1912',
-    manufacturer: 'Gibson',
-    isPrivate: false
-};
-
 const user = new User( {
     firstName: 'Test',
     lastName: 'Testerson',
@@ -32,6 +25,15 @@ const user = new User( {
     password: 'testlife'
 });
 
+const item = {
+    name: '1912 Gibson Mandolin-Guitar Mfg. Co. Style U',
+    date: '1912',
+    isPrivate: false,
+    condition:'good',
+    provenance:'America',
+    description:'A 1900s guitar in good condition.',
+    user: user.id
+};
 
 
 let token;
@@ -65,15 +67,18 @@ describe('Item Test', () => {
                 .post('/items')
                 .set({ Authorization: `Bearer ${token}` })
                 .send(item);
-
             item.id = response.body._id;
 
             response.should.have.status(statusCode.CREATED);
             response.body.should.be.a('object');
             response.body.should.have.property('name');
-            response.body.should.have.property('manufacturer');
             response.body.should.have.property('date');
             response.body.should.have.property('user').eq(user.id)
+            response.body.should.have.property('condition');
+            response.body.should.have.property('provenance');
+            response.body.should.have.property('description');
+            
+            
         });
     });
 
@@ -94,22 +99,6 @@ describe('Item Test', () => {
     });
 
     /**
-     * Test GET /items/public
-     */
-    describe('GET /items/public', () => {
-        it('should list all items', async () => {
-            const response = await chai.request(app)
-                .get('/items/public')
-                .set({ Authorization: `Bearer ${token}` });
-
-            response.should.have.status(statusCode.OK);
-            response.body.should.be.a('array');
-            response.body.length.should.be.eql(1);
-            response.body.should.each.have.property('isPrivate').eql(false);
-        });
-    });
-
-    /**
      * Test GET /items/:id
      */
     describe('GET /items/:id', () => {
@@ -121,7 +110,10 @@ describe('Item Test', () => {
             response.should.have.status(statusCode.OK);
             response.body.should.be.a('object');
             response.body.should.have.property('name');
-            response.body.should.have.property('manufacturer');
+            response.body.should.have.property('date');
+            response.body.should.have.property('condition');
+            response.body.should.have.property('provenance');
+            response.body.should.have.property('description');
             response.body.should.have.property('_id').eql(item.id);
         });
     });
