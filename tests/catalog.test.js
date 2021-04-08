@@ -3,7 +3,8 @@ const chaiHttp = require('chai-http');
 const app = require('../server/server');
 const StatusCode = require('../server/helpers/constants');
 const Catalog = require('../server/models/catalog');
-const User = require('../server/models/user')
+const Item = require('../server/models/item');
+const User = require('../server/models/user');
 const config = require('../server/config');
 const jwt = require("jsonwebtoken");
 const chaieach = require('chai-each')
@@ -13,11 +14,6 @@ const should = chai.should();
 chai.use(chaiHttp);
 chai.use(chaieach)
 
-const catalog = {
-    name: 'Vinyl Records',
-    description: 'Collection of Vinyl records from the 1980s',
-    isPrivate: false
-};
 
 
 const user = new User( {
@@ -26,6 +22,29 @@ const user = new User( {
     email: 'test@test.com',
     password: 'testlife'
 });
+
+const item1 ={
+    name: 'Iron Maiden: The Number of The Beast',
+    isPrivate: false,
+    user: user.id
+};
+
+const item2 ={
+    name: 'Metallica: Master of Puppets',
+    isPrivate: true,
+    user: user.id
+};
+
+
+const catalog ={
+    name: 'Vinyl Records',
+    description: 'Collection of Vinyl records from the 1980s',
+    isPrivate: false,
+    user: user.id
+};
+
+
+
 
 let token;
 
@@ -99,8 +118,29 @@ describe('Catalog Test', () => {
 
 
     /**
-    * Test GET /catalogs/:id
+    * Test GET /catalogs/public/:id
     */
+    describe('GET catalogs/public/:id', () => {
+        it('should return the catalog with the specified id with only public content', async () => {
+            const response = await chai.request(app)
+                .get(`/catalogs/public/${catalog.id}`)
+                .set({ Authorization: `Bearer ${token}` });
+
+            response.should.have.status(StatusCode.OK);
+            response.body.should.be.a('object');
+            response.body.should.have.property('name');
+            response.body.should.have.property('description');
+            response.body.should.have.property('items');
+            //response.body.items.length.should.be.eql(1);
+            //response.body.items.should.each.have.property('isPrivate').eql(false)
+            response.body.should.have.property('_id').eql(catalog.id);
+        });
+    });
+
+
+    /**
+     * Test GET /catalogs/:id
+     */
     describe('GET catalogs/:id', () => {
         it('should return the catalog with the specified id', async () => {
             const response = await chai.request(app)
@@ -112,6 +152,7 @@ describe('Catalog Test', () => {
             response.body.should.have.property('name');
             response.body.should.have.property('description');
             response.body.should.have.property('items');
+            //response.body.items.length.should.be.eql(2);
             response.body.should.have.property('_id').eql(catalog.id);
         });
     });
