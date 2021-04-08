@@ -57,8 +57,6 @@ describe('User Test', () => {
             .send(loginInfo)
 
         response.should.have.status(statusCode.BAD_REQUEST);
-        response.body.should.have.property('auth').eql(false);
-        response.body.should.have.property('token').eql(null);
         });
     });
 });
