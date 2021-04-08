@@ -89,6 +89,39 @@ const getCatalog = async (req, res) => {
     }
 };
 
+
+/**
+ * Gets a specific Catalog object filtered by public information
+ * @param req request object containing information about HTTP request
+ * @param res the response object used for sending back the desired HTTP response
+ * @returns {Promise<void>} the promise indicating success
+ */
+const getPublicCatalog = async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const catalog = await Catalog.findById(id)
+            .populate({
+                path: 'items',
+                match: { isPrivate : false }
+                });
+
+        if(catalog.isPrivate)
+        {
+
+            res.status(StatusCode.FORBIDDEN);
+        }
+        else
+        {
+            res.status(StatusCode.OK).json( catalog );
+        }
+
+    } catch (err) {
+        res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
+    }
+};
+
+
 /**
  * Updates a pre-existing Catalog object
  * @param req request object containing information about HTTP request
@@ -145,6 +178,7 @@ const deleteCatalog = async (req, res) => {
 module.exports = {
     getCatalogs,
     getPublicCatalogs,
+    getPublicCatalog,
     addCatalog,
     getCatalog,
     updateCatalog,
