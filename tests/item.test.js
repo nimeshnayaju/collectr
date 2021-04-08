@@ -19,9 +19,7 @@ const catalog = {
 
 const item = {
     name: '1912 Gibson Mandolin-Guitar Mfg. Co. Style U',
-    startDate:'1900',
-    endDate:'1950',
-    manufacturer: 'Gibson',
+    date:'1912-1913',
     condition:'good',
     provenance:'America',
     description:'A 1900s guitar in good condition.'
@@ -72,9 +70,7 @@ describe('Item Test', () => {
             response.should.have.status(statusCode.CREATED);
             response.body.should.be.a('object');
             response.body.should.have.property('name');
-            response.body.should.have.property('startDate');
-            response.body.should.have.property('endDate');
-            response.body.should.have.property('manufacturer');
+            response.body.should.have.property('date');
             response.body.should.have.property('condition');
             response.body.should.have.property('provenance');
             response.body.should.have.property('description');
