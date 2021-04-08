@@ -104,7 +104,10 @@ describe('Item Test', () => {
             response.should.have.status(statusCode.OK);
             response.body.should.be.a('object');
             response.body.should.have.property('name');
-            response.body.should.have.property('manufacturer');
+            response.body.should.have.property('date');
+            response.body.should.have.property('condition');
+            response.body.should.have.property('provenance');
+            response.body.should.have.property('description');
             response.body.should.have.property('_id').eql(item.id);
         });
     });
