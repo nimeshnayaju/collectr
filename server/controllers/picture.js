@@ -85,7 +85,7 @@ const updatePicture = async (req, res) => {
  * @param res the response object used for sending back the desired HTTP response
  * @returns {Promise<void>} the promise indicating success
  */
-const deleteCatalog = async (req, res) => {
+const deletePicture = async (req, res) => {
     const { id } = req.params;
 
 
@@ -103,4 +103,11 @@ const deleteCatalog = async (req, res) => {
     } catch (err) {
         res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
     }
+};
+
+module.exports = {
+    addPicture,
+    getPicture,
+    updatePicture,
+    deletePicture
 };
