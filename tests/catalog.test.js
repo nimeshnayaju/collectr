@@ -72,6 +72,21 @@ describe('Catalog Test', () => {
                 .send(catalog);
 
             catalog.id = response.body._id;
+            item1.catalog = catalog.id;
+            item2.catalog = catalog.id;
+
+            // Add the mock items to catalog
+            await chai
+                .request(app)
+                .post('/items')
+                .set({ Authorization: `Bearer ${token}` })
+                .send(item1);
+
+            await chai
+                .request(app)
+                .post('/items')
+                .set({ Authorization: `Bearer ${token}` })
+                .send(item2);
 
             response.should.have.status(StatusCode.CREATED);
             response.body.should.be.a('object');
@@ -131,8 +146,8 @@ describe('Catalog Test', () => {
             response.body.should.have.property('name');
             response.body.should.have.property('description');
             response.body.should.have.property('items');
-            //response.body.items.length.should.be.eql(1);
-            //response.body.items.should.each.have.property('isPrivate').eql(false)
+            response.body.items.length.should.be.eql(1);
+            response.body.items.should.each.have.property('isPrivate').eql(false)
             response.body.should.have.property('_id').eql(catalog.id);
         });
     });
