@@ -36,9 +36,9 @@ const login = async (req, res) => {
             const isPassword = await bcrypt.compare(password, user.password);
 
             if (!isPassword)
-                res.status(StatusCode.BAD_REQUEST).json({ message: "Incorrect email or password" });
+                return res.status(StatusCode.BAD_REQUEST).json({ message: "Incorrect email or password" });
             if (user.status !== "Active") {
-                res.status(StatusCode.BAD_REQUEST).json({ message: "Pending account. Please verify your email!" });
+                return res.status(StatusCode.BAD_REQUEST).json({ message: "Pending account. Please verify your email!" });
             }
             else {
                 // payload for JWT
@@ -47,15 +47,15 @@ const login = async (req, res) => {
                 // generate access token
                 const token = await jwt.sign(payload, config.accessTokenSecret, config.signOptions);
                 
-                res.json({ auth: true, token: token });
+                return res.json({ auth: true, token: token });
 
             }
 
         } else {
-            res.status(StatusCode.BAD_REQUEST).json({ message: "user not found" });
+            return res.status(StatusCode.BAD_REQUEST).json({ message: "user not found" });
         }
     } catch (err) {
-        res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
+        return res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
     }
 }
 
@@ -71,14 +71,14 @@ const signup = async (req, res) => {
         const { errors, isValid } = validateSignup(req.body);
 
         if (!isValid) {
-            res.status(StatusCode.BAD_REQUEST).json(errors);
+            return res.status(StatusCode.BAD_REQUEST).json(errors);
         }
 
         // find if the user with the specified email already exist
         let user = await User.findOne({ email: req.body.email });
 
         if (user && user.status === "Active") {
-            res.status(StatusCode.BAD_REQUEST).json({ message: 'User already found!' });
+            return res.status(StatusCode.BAD_REQUEST).json({ message: 'User already found!' });
 
         } else {
             if (!user) {
@@ -114,7 +114,7 @@ const signup = async (req, res) => {
             }
         }
     } catch (err) {
-        res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
+        return res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
 
     }
 };
@@ -131,20 +131,20 @@ const verifySignup = async (req, res) => {
 
         const verificationToken = await Token.findOne({ user: userId, expiresAt: {$gt: Date.now()} });
         if (!verificationToken) {
-            res.status(StatusCode.BAD_REQUEST).json({ message: "invalid or expired verification token" });
+            return res.status(StatusCode.BAD_REQUEST).json({ message: "invalid or expired verification token" });
         }
 
         const isValid = await bcrypt.compare(token, verificationToken.token);
         if (!isValid) {
-            res.status(StatusCode.BAD_REQUEST).json({ message: "invalid or expired verification token" });
+            return res.status(StatusCode.BAD_REQUEST).json({ message: "invalid or expired verification token" });
         }
 
         await User.findByIdAndUpdate(userId, { $set: { status: "Active" } }, { new: true });
         verificationToken.deleteOne();
-        res.status(StatusCode.CREATED).send("Your account has been activated successfully");
+        return res.status(StatusCode.CREATED).send("Your account has been activated successfully");
 
     } catch (err) {
-        res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
+        return res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
     }
 };
 
@@ -191,7 +191,7 @@ const forgotPassword = async (req, res) => {
             console.log(err);
         }
     } catch(err){
-            res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
+            return res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
         }
 };
 
@@ -208,12 +208,12 @@ const resetPassword = async (req, res) => {
         const passwordResetToken = await Token.findOne({ user: userId, expiresAt: {$gt: Date.now()} });
 
         if (!passwordResetToken) {
-            res.status(StatusCode.BAD_REQUEST).json({ message: "invalid or expired password reset token" });
+            return res.status(StatusCode.BAD_REQUEST).json({ message: "invalid or expired password reset token" });
         }
 
         const isValid = await bcrypt.compare(token, passwordResetToken.token);
         if (!isValid) {
-            res.status(StatusCode.BAD_REQUEST).json({ message: "invalid or expired password reset token" });
+            return res.status(StatusCode.BAD_REQUEST).json({ message: "invalid or expired password reset token" });
         }
 
         const hash = await bcrypt.hash(password, salt);
@@ -235,7 +235,7 @@ const resetPassword = async (req, res) => {
 
     } catch(err){
 
-        res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
+        return res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
 
     }
 };
