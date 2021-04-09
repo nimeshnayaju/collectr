@@ -76,7 +76,7 @@ const getCatalog = async (req, res) => {
             }
             else
             {
-                res.status(StatusCode.FORBIDDEN);
+                res.status(StatusCode.FORBIDDEN).json({ message: "you are not authorized to access this resource" });
             }
         }
         else
@@ -109,7 +109,7 @@ const getPublicCatalog = async (req, res) => {
         if(catalog.isPrivate)
         {
 
-            res.status(StatusCode.FORBIDDEN);
+            res.status(StatusCode.FORBIDDEN).json({ message: "you are not authorized to access this resource" });
         }
         else
         {
@@ -140,7 +140,7 @@ const updateCatalog = async (req, res) => {
         }
         else
         {
-            res.status(StatusCode.FORBIDDEN);
+            res.status(StatusCode.FORBIDDEN).json({ message: "you are not authorized to access this resource" });
         }
     } catch (err) {
         res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
@@ -167,7 +167,7 @@ const deleteCatalog = async (req, res) => {
         }
         else
         {
-            res.status(StatusCode.FORBIDDEN);
+            res.status(StatusCode.FORBIDDEN).json({ message: "you are not authorized to access this resource" });
         }
     } catch (err) {
         res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
