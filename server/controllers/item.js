@@ -6,15 +6,8 @@ const getItemFields = async (req, res) => {
     const catalogId = req.params.id;
     try {
         let catalog = await Catalog.findById(catalogId);
-        if (catalog.isPrivate) {
-            if(req.user == catalog.user)
-            {
-                res.status(StatusCode.OK).json( catalog );
-            }
-            else
-            {
-                res.status(StatusCode.FORBIDDEN).json({ message: "you are not authorized to access this resource" });
-            }
+        if (catalog.isPrivate && catalog.user != req.user) {
+            res.status(StatusCode.FORBIDDEN).json({ message: "you are not authorized to access this resource" });
         } else {
             const itemFields = catalog.itemFields;
             return res.status(StatusCode.OK).json( itemFields );
