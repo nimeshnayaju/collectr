@@ -33,12 +33,15 @@ const login = async (req, res) => {
         let user = await User.findOne({ email });
 
         if (user) {
-            const isPassword = await bcrypt.compare(password, user.password);
-
-            if (!isPassword)
-                return res.status(StatusCode.BAD_REQUEST).json({ message: "Incorrect email or password" });
+            
             if (user.status !== "Active") {
                 return res.status(StatusCode.BAD_REQUEST).json({ message: "Pending account. Please verify your email!" });
+            }
+
+            const isPassword = await bcrypt.compare(password, user.password);
+
+            if (!isPassword) {
+                return res.status(StatusCode.BAD_REQUEST).json({ message: "Incorrect email or password" });
             }
             else {
                 // payload for JWT
