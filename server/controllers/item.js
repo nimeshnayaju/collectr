@@ -6,9 +6,13 @@ const getItemFields = async (req, res) => {
     const catalogId = req.params.id;
     try {
         let catalog = await Catalog.findById(catalogId);
-        const itemFields = catalog.itemFields;
-        return res.status(StatusCode.OK).json( itemFields );
-    } catch (err) {
+        if (catalog.isPrivate && catalog.user != req.user) {
+            res.status(StatusCode.FORBIDDEN).json({ message: "you are not authorized to access this resource" });
+        } else {
+            const itemFields = catalog.itemFields;
+            return res.status(StatusCode.OK).json( itemFields );
+        }
+   } catch (err) {
         console.log(err);
     }
 }
@@ -73,7 +77,7 @@ const updateItem = async (req, res) => {
         }
         else
         {
-            res.status(StatusCode.FORBIDDEN);
+            res.status(StatusCode.FORBIDDEN).json({ message: "you are not authorized to access this resource" });
         }
     } catch (err) {
         res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
@@ -91,15 +95,18 @@ const updateItem = async (req, res) => {
 
     try {
         const item = await Item.findById(id);
-        if(req.user == item.user)
-        {
-            res.status(StatusCode.OK).json(item);
+        if (item.isPrivate) {
+            if(req.user == item.user)
+            {
+                res.status(StatusCode.OK).json(item);
+            }
+            else
+            {
+                res.status(StatusCode.FORBIDDEN).json({ message: "you are not authorized to access this resource" });
+            }
+        } else {
+            res.status(StatusCode.OK).json( item );
         }
-        else
-        {
-            res.status(StatusCode.FORBIDDEN);
-        }
-
     } catch (err) {
         res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
     }
@@ -123,7 +130,7 @@ const deleteItem = async (req, res) => {
         }
         else
         {
-            res.status(StatusCode.FORBIDDEN);
+            res.status(StatusCode.FORBIDDEN).json({ message: "you are not authorized to access this resource" });
         }
 
     } catch (err) {
