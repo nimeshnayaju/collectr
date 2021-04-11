@@ -14,7 +14,8 @@ const itemRoutes = require('./routes/item');
 const userRoutes = require('./routes/user');
 
 
-app.use(express.json()); // Parse application/json (recognize the incoming request object as a JSON object)
+app.use(express.json({limit: '50mb'}));
+app.use(express.urlencoded({limit: '50mb'}));
 app.use(cors());
 
 // App route configuration
