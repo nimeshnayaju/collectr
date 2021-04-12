@@ -1,18 +1,10 @@
 const validator = require("validator");
 const isEmpty = require('is-empty');
 
-const validateLogin = (data) => {
+const validateResetPassword = (data) => {
     let errors = {};
 
-    data.email = !isEmpty(data.email) ? data.email : '';
     data.password = !isEmpty(data.password) ? data.password : '';
-
-    // Validate email
-    if (validator.isEmpty(data.email)) {
-        errors.email = 'Email is required'
-    } else if (!validator.isEmail(data.email)) {
-        errors.email = "Email is invalid";
-    }
 
     // Validate password
     if (validator.isEmpty(data.password)) {
@@ -70,6 +62,6 @@ const validateSignup = (data) => {
 }
 
 module.exports = {
-    validateLogin,
-    validateSignup
+    validateSignup,
+    validateResetPassword
 }

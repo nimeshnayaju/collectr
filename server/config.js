@@ -8,6 +8,7 @@ const config = {
     accessTokenSecret: process.env.ACCESS_TOKEN_SECRET,
     email: process.env.FROM_EMAIL,
     password: process.env.FROM_PASSWORD,
+    serverURL: process.env.SERVER_URL,
     clientURL: process.env.CLIENT_URL,
     signOptions: {
         expiresIn: process.env.ACCESS_TOKEN_LIFE,
