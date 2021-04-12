@@ -7,7 +7,7 @@ const User = require('../models/user');
 const StatusCode = require('../helpers/constants');
 const config = require('../config');
 const sendEmail = require('../helpers/email');
-const { validateLogin, validateSignup } = require('../helpers/validation');
+const { validateLogin, validateSignup, validateResetPassword } = require('../helpers/validation');
 const salt = 6;
 
 
@@ -19,13 +19,6 @@ const salt = 6;
  */
 const login = async (req, res) => {
     try {
-        // form validation
-        const { errors, isValid } = validateLogin(req.body);
-    
-        if (!isValid) {
-            return res.status(StatusCode.BAD_REQUEST).json( errors );
-        }
-
         // read email and password from request body
         const {email, password} = req.body;
 
@@ -100,10 +93,10 @@ const signup = async (req, res) => {
             }
             let verificationToken = crypto.randomBytes(32).toString("hex");
             const hash = await bcrypt.hash(verificationToken, salt);
-            await new Token({ user: user._id, token: hash, expiresAt: Date.now() + 86400000 }).save(); // expires in 1 day
+            await new Token({ user: user._id, token: hash, expiresAt: Date.now() + 360000 }).save(); // expires in 1 hour
     
             const html =  '<p>Please click on the following link within the next one hour to verify your account on Collectrs</p>'
-                        + `<a href='http://${config.clientURL}/users/signup/verify/?token=${verificationToken}&userId=${user._id}'>Verify Account</a>`
+                        + `<a href='http://${config.serverURL}/users/signup/verify/?token=${verificationToken}&userId=${user._id}'>Verify Account</a>`
                         + '<p>Thank you,</p>'
                         + '<p>Collectrs</p>';
 
@@ -214,9 +207,16 @@ const resetPassword = async (req, res) => {
             return res.status(StatusCode.BAD_REQUEST).json({ message: "invalid or expired password reset token" });
         }
 
-        const isValid = await bcrypt.compare(token, passwordResetToken.token);
-        if (!isValid) {
+        const isValidToken = await bcrypt.compare(token, passwordResetToken.token);
+        if (!isValidToken) {
             return res.status(StatusCode.BAD_REQUEST).json({ message: "invalid or expired password reset token" });
+        }
+
+        // form validation
+        const { errors, isValid } = validateResetPassword(req.body);
+
+        if (!isValid) {
+            return res.status(StatusCode.BAD_REQUEST).json(errors);
         }
 
         const hash = await bcrypt.hash(password, salt);
