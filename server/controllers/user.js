@@ -96,7 +96,7 @@ const signup = async (req, res) => {
             await new Token({ user: user._id, token: hash, expiresAt: Date.now() + 360000 }).save(); // expires in 1 hour
     
             const html =  '<p>Please click on the following link within the next one hour to verify your account on Collectrs</p>'
-                        + `<a href='http://${config.serverURL}/users/signup/verify/?token=${verificationToken}&userId=${user._id}'>Verify Account</a>`
+                        + `<a href='https://${config.serverURL}/users/signup/verify/?token=${verificationToken}&userId=${user._id}'>Verify Account</a>`
                         + '<p>Thank you,</p>'
                         + '<p>Collectrs</p>';
 
@@ -169,7 +169,7 @@ const forgotPassword = async (req, res) => {
             await new Token({ user: user._id, token: hash, expiresAt: Date.now() + 3600000 }).save(); // expires in 1 hours
     
             const html =  '<p>You are receiving this because we received a password reset request from your account. Please click on the following link, or paste the link into your browser within an hour of receiving it to reset your password:</p>'
-                        + `<a href='http://${config.clientURL}/reset/?token=${resetToken}&userId=${user._id}'>Reset Password</a>`
+                        + `<a href='https://${config.clientURL}/reset/?token=${resetToken}&userId=${user._id}'>Reset Password</a>`
                         + '<p>If you did not request this, please ignore this email and your password will remain unchanged.</p>'
                         + '<p>Thank you,</p>'
                         + '<p>Collectrs</p>';
