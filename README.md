@@ -2,13 +2,13 @@
 Group project for Mount Allison's COMP-4721 (Software Design) Course
 
 ## Team members
-- Nimesh Nayaju (Project Manager and Product Owner)
-- Weiting Li (Revision Control Master)
-- Patrick Andrews (Scrum Master)
-- Saralin Zassman (Documentation Lead)
-- Alexander Little (Architect)
+- **Nimesh Nayaju** (Project Manager and Product Owner)
+- **Weiting Li** (Revision Control Master)
+- **Patrick Andrews** (Scrum Master)
+- **Saralin Zassman** (Documentation Lead)
+- **Alexander Little** (Architect)
 
-The overall **project** comprises of a [back-end server](https://github.com/nimeshnayaju/collectr) and [front-end server](https://github.com/nimeshnayaju/collectr-client) developed in separate GitHub repositories. Please refer to [collectr-client](https://github.com/nimeshnayaju/collectr-client) to learn about our front-end development.
+The overall **project** comprises of a [back-end server](https://github.com/nimeshnayaju/collectr) and a "[front-end server](https://github.com/nimeshnayaju/collectr-client) developed in separate GitHub repositories. Please refer to [collectr-client](https://github.com/nimeshnayaju/collectr-client) to learn about our front-end development.
 
 ## Installation
 
